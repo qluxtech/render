@@ -11,16 +11,17 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// --- システム管理状態 ---
 let totalRevenue = 71043845;
 let activeNodes = 524100;
 let compoundPool = 6932635;
 let systemActive = true;
 
-// ==========================================
-// Q-LUX ENTERPRISE // 完全統合メインUI
-// ==========================================
 app.get('/', (req, res) => {
+  // ブラウザにキャッシュさせないヘッダーを付与
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
   res.send(`
     <!DOCTYPE html>
     <html lang="ja">
@@ -48,7 +49,6 @@ app.get('/', (req, res) => {
           justify-content: center;
         }
         .wrapper { width: 100%; max-width: 480px; }
-        
         .header {
           text-align: center;
           margin-bottom: 16px;
@@ -57,7 +57,6 @@ app.get('/', (req, res) => {
         }
         .header h1 { font-size: 16px; font-weight: 700; color: var(--accent-cyan); margin: 0; letter-spacing: 1.5px; }
         .header p { font-size: 10px; color: var(--text-muted); margin: 5px 0 0; }
-
         .net-box {
           background: var(--bg-panel);
           border: 1px solid var(--border-clr);
@@ -67,7 +66,6 @@ app.get('/', (req, res) => {
           margin-bottom: 14px;
         }
         canvas { width: 100%; height: 100%; display: block; }
-
         .stats-grid {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
@@ -81,7 +79,6 @@ app.get('/', (req, res) => {
         }
         .stat-item div:first-child { font-size: 7.5px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
         .stat-item div:last-child { font-size: 11px; color: var(--accent-cyan); font-weight: 700; margin-top: 4px; }
-
         .card {
           background: var(--bg-panel);
           border: 1px solid var(--border-clr);
@@ -91,7 +88,6 @@ app.get('/', (req, res) => {
         }
         .card-title { color: var(--text-main); font-size: 12px; font-weight: 600; margin-bottom: 4px; }
         .card-desc { color: var(--text-muted); font-size: 10.5px; margin-bottom: 12px; line-height: 1.4; }
-        
         .code-tag {
           background: #040609;
           border: 1px solid var(--border-clr);
@@ -103,7 +99,6 @@ app.get('/', (req, res) => {
           text-align: center;
           margin-bottom: 8px;
         }
-
         button {
           background: linear-gradient(135deg, var(--accent-cyan) 0%, #0088ff 100%);
           color: #07090e;
@@ -122,7 +117,6 @@ app.get('/', (req, res) => {
           color: var(--accent-green);
           border: 1px solid rgba(16, 185, 129, 0.3);
         }
-
         .log-box {
           background: #040609;
           border: 1px solid var(--border-clr);
@@ -185,7 +179,7 @@ app.get('/', (req, res) => {
 
         <div class="card">
           <div class="card-title">システム監査コンソール (HandCash直結)</div>
-          <div id="log" class="log-box">[06:14:00] 🟢 Q-LUX ENTERPRISE ネットワーク正常稼働中</div>
+          <div id="log" class="log-box">[06:19:00] 🟢 Q-LUX ENTERPRISE ネットワーク正常稼働中</div>
         </div>
       </div>
 
@@ -254,7 +248,7 @@ app.get('/', (req, res) => {
 
         function downloadConfig() {
           addLog('⬇ Teranode コンフィグファイル生成中...');
-          const configContent = `[Q-LUX_ENTERPRISE_CONFIG]\\npaymail=vlisdigitalassetlabs@handcash.io\\nnode_mode=quantum_direct\\nfee_rate=0\\nsecurity=maximum`;
+          const configContent = "[Q-LUX_ENTERPRISE_CONFIG]\\npaymail=vlisdigitalassetlabs@handcash.io\\nnode_mode=quantum_direct\\nfee_rate=0\\nsecurity=maximum";
           const blob = new Blob([configContent], { type: 'text/plain' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -278,9 +272,6 @@ app.get('/', (req, res) => {
   `);
 });
 
-// ==========================================
-// バックエンド・自動入金インデックスエンジン
-// ==========================================
 app.post('/api/compound', (req, res) => {
     const addedSats = 1500000;
     totalRevenue += addedSats;
@@ -291,7 +282,7 @@ app.post('/api/compound', (req, res) => {
 
 setInterval(() => {
     if (!systemActive) return;
-    const deltaSats = 250000; // リアルタイム自動インデックス入金
+    const deltaSats = 250000;
     totalRevenue += deltaSats;
     activeNodes += 1;
     
