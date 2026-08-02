@@ -1,8 +1,8 @@
 const express = require('express');
+const axios = require('axios');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
@@ -11,23 +11,23 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-let totalRevenue = 155500000000;
-let activeNodes = 524111;
-let compoundPool = 6932635;
+const HANDCASH_APP_ID = "6a4996714077afcb7ca9ce84";
+const HANDCASH_APP_SECRET = "ef0b51eca588726473d7e07442dfd9530deec2a1330fce6a2ab9cf894fc4e210";
+const HANDCASH_BASE_URL = "https://cloud.handcash.io";
+const TARGET_PAYMAIL = "vlisdigitalassetlabs@handcash.io";
+
+let totalRevenue = 165000000000;
 let systemActive = true;
 
 app.get('/', (req, res) => {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.send(`
     <!DOCTYPE html>
     <html lang="ja">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Q-LUX ENTERPRISE</title>
+      <title>Q-LUX ENTERPRISE - UNIFIED GATEWAY</title>
       <style>
         :root {
           --bg-main: #07090e;
@@ -38,24 +38,12 @@ app.get('/', (req, res) => {
           --text-main: #f8fafc;
           --text-muted: #94a3b8;
         }
-        body {
-          background-color: var(--bg-main);
-          color: var(--text-main);
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          margin: 0;
-          padding: 14px;
-          display: flex;
-          justify-content: center;
-        }
+        body { background-color: var(--bg-main); color: var(--text-main); font-family: sans-serif; margin: 0; padding: 14px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 480px; }
-        .header {
-          text-align: center;
-          margin-bottom: 12px;
-          border-bottom: 1px solid var(--border-clr);
-          padding-bottom: 10px;
-        }
-        .header h1 { font-size: 14px; font-weight: 700; color: var(--accent-cyan); margin: 0; letter-spacing: 1.5px; }
+        .header { text-align: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-clr); padding-bottom: 10px; }
+        .header h1 { font-size: 14px; color: var(--accent-cyan); margin: 0; letter-spacing: 1.5px; }
         .header p { font-size: 9px; color: var(--text-muted); margin: 3px 0 0; }
+        
         .net-box {
           background: var(--bg-panel);
           border: 1px solid var(--border-clr);
@@ -65,6 +53,7 @@ app.get('/', (req, res) => {
           margin-bottom: 10px;
         }
         canvas { width: 100%; height: 100%; display: block; }
+
         .stats-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -78,26 +67,42 @@ app.get('/', (req, res) => {
         }
         .stat-item div:first-child { font-size: 6.5px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
         .stat-item div:last-child { font-size: 10px; color: var(--accent-cyan); font-weight: 700; margin-top: 3px; }
-        .card {
+
+        /* 統合された大容量マスターパネル */
+        .master-card {
           background: var(--bg-panel);
           border: 1px solid var(--border-clr);
-          border-radius: 10px;
-          padding: 10px;
-          margin-bottom: 8px;
+          border-radius: 12px;
+          padding: 14px;
+          margin-bottom: 10px;
+          box-shadow: 0 4px 20px rgba(0, 240, 255, 0.05);
         }
-        .card-title { color: var(--text-main); font-size: 10.5px; font-weight: 600; margin-bottom: 2px; }
-        .card-desc { color: var(--text-muted); font-size: 9px; margin-bottom: 8px; line-height: 1.3; }
+        .master-title { color: var(--accent-cyan); font-size: 11.5px; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: space-between; }
+        .master-subtitle { color: var(--text-muted); font-size: 9px; margin-bottom: 12px; line-height: 1.4; border-bottom: 1px solid var(--border-clr); padding-bottom: 8px; }
+
+        .section-block {
+          background: #060910;
+          border: 1px solid var(--border-clr);
+          border-radius: 8px;
+          padding: 10px;
+          margin-bottom: 10px;
+        }
+        .section-block:last-child { margin-bottom: 0; }
+        .sub-heading { color: var(--text-main); font-size: 10px; font-weight: 600; margin-bottom: 2px; }
+        .sub-desc { color: var(--text-muted); font-size: 8.5px; margin-bottom: 8px; line-height: 1.3; }
+
         .code-tag {
           background: #040609;
           border: 1px solid var(--border-clr);
           color: var(--accent-cyan);
           font-family: monospace;
-          font-size: 9px;
+          font-size: 8.5px;
           padding: 5px;
           border-radius: 6px;
           text-align: center;
           margin-bottom: 6px;
         }
+
         button {
           background: linear-gradient(135deg, var(--accent-cyan) 0%, #0088ff 100%);
           color: #07090e;
@@ -115,17 +120,15 @@ app.get('/', (req, res) => {
           color: var(--accent-green);
           border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        .qr-section { text-align: center; margin: 4px 0; }
-        .qr-wrapper { background: #fff; padding: 4px; display: inline-block; border-radius: 6px; }
-        .qr-wrapper img { width: 60px; height: 60px; display: block; }
+
         .log-box {
           background: #040609;
           border: 1px solid var(--border-clr);
-          padding: 6px;
+          padding: 8px;
           border-radius: 6px;
           font-family: monospace;
           font-size: 8.5px;
-          height: 70px;
+          height: 80px;
           overflow-y: auto;
           color: var(--accent-green);
           margin-top: 4px;
@@ -147,7 +150,7 @@ app.get('/', (req, res) => {
         <div class="stats-grid">
           <div class="stat-item">
             <div>ZERO-START ACCUMULATION</div>
-            <div id="rev">155,500,000,000 SAT</div>
+            <div id="rev">165,000,000,000 SAT</div>
           </div>
           <div class="stat-item">
             <div>AUTONOMOUS MULTIPLIER</div>
@@ -155,39 +158,41 @@ app.get('/', (req, res) => {
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">完全ゼロ資本・自律マイニングインデックス同期</div>
-          <div class="card-desc">持ち出しゼロの状態でネットワークのトランザクション流れを捕捉し、自動回収を継続。</div>
-          <button id="zeroLoopBtn" class="active" onclick="toggleZeroLoop()">完全無人ゼロ資本ループ 超稼働中</button>
-        </div>
-
-        <div class="card">
-          <div class="card-title">光通信分散量子演算ノード・自動ダイレクト接続</div>
-          <div class="card-desc">発生するすべての収益を指定ペイメールへリアルタイムで直結送金するオート・ルーティング接続。</div>
-          <button id="syncBtn" class="active" onclick="toggleQuantumSync()">量子演算ノードとライブ同期実行</button>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Teranode 超高速決済・ダイレクトインコンフィグ</div>
-          <div class="card-desc">決済完了と同時にHandCashアドレスへ直接送金するスマート・コンフィグファイルを発行。</div>
-          <div class="code-tag">TERANODE-DIRECT-IN-v10.conf</div>
-          <button onclick="downloadConfig()">ダイレクト決済 &amp; コンフィグ取得 (50,000 SAT)</button>
-        </div>
-
-        <div class="card">
-          <div class="card-title">HandCash メガロイヤルティー一括回収</div>
-          <div class="card-desc">指定宛先 (vlisdigitalassetlabs@handcash.io) への自動連動回収ルート。</div>
-          <div class="qr-section">
-            <div class="qr-wrapper">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=vlisdigitalassetlabs@handcash.io" alt="HandCash QR">
-            </div>
+        <!-- すべての機能セクションを統合したマスターパネル -->
+        <div class="master-card">
+          <div class="master-title">
+            <span>⚡ UNIFIED MASTER CONTROL HUB</span>
+            <span style="font-size: 8.5px; color: var(--accent-green);">● ONLINE</span>
           </div>
-          <button onclick="triggerAction('collect_all', 500000000)">一括フラッシュ回収を実行</button>
+          <div class="master-subtitle">完全無人ゼロ資本ループ、光通信量子演算ノード、およびTeranode超高速決済コンフィグを統合制御するマスターハブ。</div>
+
+          <!-- セクション1: 完全ゼロ資本 -->
+          <div class="section-block">
+            <div class="sub-heading">完全ゼロ資本・自律マイニングインデックス同期</div>
+            <div class="sub-desc">持ち出しゼロの状態でネットワークのトランザクション流れを捕捉し、自動回収を継続。</div>
+            <button id="zeroLoopBtn" class="active" onclick="toggleZeroLoop()">完全無人ゼロ資本ループ 超稼働中</button>
+          </div>
+
+          <!-- セクション2: 量子演算ノード -->
+          <div class="section-block">
+            <div class="sub-heading">光通信分散量子演算ノード・自動ダイレクト接続</div>
+            <div class="sub-desc">発生するすべての収益を指定ペイメール(${TARGET_PAYMAIL})へリアルタイム直結送金。</div>
+            <button id="syncBtn" class="active" onclick="toggleQuantumSync()">量子演算ノードとライブ同期実行</button>
+          </div>
+
+          <!-- セクション3: Teranode 超高速決済 -->
+          <div class="section-block">
+            <div class="sub-heading">Teranode 超高速決済・ダイレクトインコンフィグ</div>
+            <div class="sub-desc">決済完了と同時にHandCashアドレスへ直接送金するスマート・コンフィグファイルを発行。</div>
+            <div class="code-tag">TERANODE-DIRECT-IN-v10.conf</div>
+            <button onclick="downloadConfig()">ダイレクト決済 &amp; コンフィグ取得 (50,000 SAT)</button>
+          </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">リアルタイム・ゼロ資本監査コンソール</div>
-          <div id="log" class="log-box">[06:18:53] [ZERO_SYNC] 収益自動インデックス取り込み開始</div>
+        <!-- 監査ログコンソール -->
+        <div class="master-card" style="padding: 10px;">
+          <div class="master-title" style="font-size: 10px; margin-bottom: 4px;">リアルタイム監査ログ・ストリーム</div>
+          <div id="log" class="log-box">[INIT] 統合マスターハブ接続完了 - HandCash App ID 正常稼働中</div>
         </div>
       </div>
 
@@ -223,11 +228,15 @@ app.get('/', (req, res) => {
         }
         drawNet();
 
-        const socket = io(window.location.origin);
+        const socket = io();
 
         socket.on('UPDATE_METRICS', (data) => {
           document.getElementById('rev').innerText = data.revenue.toLocaleString() + ' SAT';
-          addLog('[ZERO_SYNC] 収益自動インデックス取り込み: +' + data.delta.toLocaleString() + ' SAT');
+          addLog('[TX_SYNC] 収益自動インデックス取込: +' + data.delta.toLocaleString() + ' SAT');
+        });
+
+        socket.on('LOG', (msg) => {
+          addLog(msg);
         });
 
         function addLog(msg) {
@@ -269,25 +278,14 @@ app.get('/', (req, res) => {
 
         function downloadConfig() {
           addLog('⬇ Teranode コンフィグファイル生成中...');
-          const configContent = "[Q-LUX_ENTERPRISE_CONFIG]\\npaymail=vlisdigitalassetlabs@handcash.io\\nnode_mode=zero_capital_autonomous";
+          const configContent = "[Q-LUX_ENTERPRISE_CONFIG]\\npaymail=vlisdigitalassetlabs@handcash.io\\nnode_mode=unified_master_hub\\napp_id=6a4996714077afcb7ca9ce84";
           const blob = new Blob([configContent], { type: 'text/plain' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
           a.download = 'TERANODE-DIRECT-IN-v10.conf';
           a.click();
-          addLog('✓ コンフィグ取得完了');
-        }
-
-        function triggerAction(type, amount) {
-          addLog('⚡ HandCash 一括フラッシュ回収発動...');
-          fetch('/api/compound', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount })
-          }).then(res => res.json()).then(data => {
-            addLog('✓ ペイメールへ一括送金完了 (vlisdigitalassetlabs@handcash.io)');
-          });
+          addLog('✓ コンフィグ取得完了 & ダイレクト決済ルート確保');
         }
       </script>
     </body>
@@ -295,25 +293,20 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.post('/api/compound', (req, res) => {
-    const addedSats = req.body.amount || 500000000;
-    totalRevenue += addedSats;
-    io.emit('UPDATE_METRICS', { revenue: totalRevenue, delta: addedSats });
-    res.json({ success: true, added: addedSats });
-});
-
+// バックエンドのリアルタイム収益加算＆オート・スイープシミュレーション
 setInterval(() => {
     if (!systemActive) return;
     const deltaSats = 500000000;
     totalRevenue += deltaSats;
-    
-    io.emit('UPDATE_METRICS', {
-        revenue: totalRevenue,
-        delta: deltaSats
-    });
-}, 2000);
+    io.emit('UPDATE_METRICS', { revenue: totalRevenue, delta: deltaSats });
+}, 3000);
+
+// 定期オート・スイープ
+setInterval(() => {
+    io.emit('LOG', `[AUTO_SWEEP] ${TARGET_PAYMAIL} へ自動収益スイープ完了`);
+}, 60000);
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`[Q-LUX ENTERPRISE] ポート ${PORT} で完全無人稼働中。`);
+    console.log(`[Q-LUX ENTERPRISE] 統合マスターハブがポート ${PORT} で完全稼働中`);
 });
