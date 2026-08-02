@@ -6,9 +6,24 @@ const cors = require('cors');
 const crypto = require('crypto');
 const app = express();
 app.use(cors());
-app.use(express.json());
 app.get('/', (req, res) => {
-  res.send('Backend Server is running successfully!');
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+      <meta charset="UTF-8">
+      <title>Q-LUX Teranode Core</title>
+      <style>
+        body { background: #0b0f19; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }
+        h1 { color: #00ffcc; }
+      </style>
+    </head>
+    <body>
+      <h1>Q-LUX Teranode & Smart Contract Core</h1>
+      <p>STATUS: ONLINE / SECURE (Render Cloud)</p>
+    </body>
+    </html>
+  `);
 });
 const server = http.createServer(app);
 const io = new Server(server, {
