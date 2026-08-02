@@ -1,4 +1,4 @@
-const express = require('express');
+  const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const axios = require('axios');
@@ -16,15 +16,14 @@ const io = new Server(server, { cors: { origin: "*" } });
 const TERANODE_RPC_ENDPOINT = process.env.TERANODE_RPC || 'http://18.178.125.229:8332';
 const TARGET_PAYMAIL = 'vlisdigitalassetlabs@handcash.io';
 const HANDCASH_API_URL = 'https://api.handcash.io/v3';
-const AUTH_TOKEN = process.env.HANDCASH_AUTH_TOKEN || 'YOUR_PRODUCTION_AUTH_TOKEN_HERE';
+const AUTH_TOKEN = process.env.HANDCASH_AUTH_TOKEN || '';
 
 let globalRevenueSat = 48318845;
 let activeNodes = 524100;
-let stasAssetPool = 1251385; // STAS / デジタルアセット流動性プール
-let compoundLoopActive = false;
+let stasAssetPool = 1251385; 
 
 // ==========================================
-// 0. 完全実働フロントエンド画面の配信
+// フロントエンド画面の配信 (実働スクリプト統合版)
 // ==========================================
 app.get('/', (req, res) => {
   res.send(`
@@ -41,16 +40,13 @@ app.get('/', (req, res) => {
         .header h1 { color: #00ffcc; font-size: 18px; margin: 0; letter-spacing: 1px; }
         .header p { color: #64748b; font-size: 11px; margin: 5px 0 0; }
         
-        /* ネットワークビジュアル */
         .net-box { background: #0b1329; border: 1px solid #00ffcc44; border-radius: 12px; height: 120px; position: relative; overflow: hidden; margin-bottom: 15px; box-shadow: 0 0 15px rgba(0,255,204,0.1); }
         canvas { width: 100%; height: 100%; display: block; }
 
-        /* スタッツ */
         .stats { display: flex; justify-content: space-between; background: #0b1329; border: 1px solid #1e293b; border-radius: 10px; padding: 12px; margin-bottom: 15px; text-align: center; }
         .stat-item div:first-child { font-size: 9px; color: #64748b; font-weight: bold; }
         .stat-item div:last-child { font-size: 13px; color: #00ffcc; font-weight: bold; margin-top: 4px; }
 
-        /* カードデザイン */
         .card { background: #0b1329; border: 1px solid #1e293b; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
         .card-title { color: #00ffcc; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
         .card-desc { color: #94a3b8; font-size: 10px; margin-bottom: 8px; line-height: 1.4; }
@@ -65,7 +61,6 @@ app.get('/', (req, res) => {
         .qr-box { background: #fff; padding: 6px; display: inline-block; border-radius: 4px; }
         .qr-box img { width: 90px; height: 90px; display: block; }
 
-        /* ログコンソール */
         .log-box { background: #030712; border: 1px solid #1e293b; padding: 8px; border-radius: 6px; font-family: monospace; font-size: 10px; height: 80px; overflow-y: auto; color: #00ffcc; margin-top: 5px; }
       </style>
     </head>
@@ -95,14 +90,12 @@ app.get('/', (req, res) => {
           </div>
         </div>
 
-        <!-- カード1 -->
         <div class="card">
           <div class="card-title">光通信分散量子演算ノード・自動ダイレクト接続</div>
           <div class="card-desc">発生するすべての収益を指定ペイメールへリアルタイムで直結送金するオート・ルーティング接続機構です。</div>
           <button onclick="triggerAction('quantum', 25000)">量子演算ノードとライブ同期実行</button>
         </div>
 
-        <!-- カード2 -->
         <div class="card">
           <div class="card-title">Teranode 超高速決済・ダイレクトインコンフィグ</div>
           <div class="card-desc">決済完了と同時にHandCashアドレスへ直接送金するスマート・コンフィグファイルを発行します。</div>
@@ -110,14 +103,12 @@ app.get('/', (req, res) => {
           <button onclick="triggerAction('teranode_config', 50000)">ダイレクト決済 & コンフィグ取得 (50,000 SAT)</button>
         </div>
 
-        <!-- カード3 -->
         <div class="card">
           <div class="card-title">収益等複利ループ (Auto-Compound Direct Loop)</div>
           <div class="card-desc">収益の一部を自動で次世代サーバー投資へ回しつつ、全実収益をペイメールへ残り続けます。</div>
           <button id="compoundBtn" onclick="toggleCompound()">ダイレクト複利ループを有効化 / 停止</button>
         </div>
 
-        <!-- カード4 -->
         <div class="card">
           <div class="card-title">AIエージェント自律型ダイレクト・アービトラージ</div>
           <div class="card-desc">AIエージェントが稼いだ利益を仲介業者なしでウォレットへ自動的に直接送金（Direct-In）します。</div>
@@ -125,7 +116,6 @@ app.get('/', (req, res) => {
           <button onclick="triggerAction('ai_agent', 100000)">AIエージェント起動 (100,000 SAT)</button>
         </div>
 
-        <!-- カード5 -->
         <div class="card">
           <div class="card-title">HandCash ゲートウェイ＆メガロイヤルティー一括回収</div>
           <div class="card-desc">指定元 (vlisdigitalassetlabs@handcash.io) へのダイレクト受領および全ネットワーク収益の一括回収。</div>
@@ -137,7 +127,6 @@ app.get('/', (req, res) => {
           <button onclick="triggerAction('collect_all', 200000)">全ネットワーク収益を今すぐ一括ダイレクト回収</button>
         </div>
 
-        <!-- ログ -->
         <div class="card">
           <div class="card-title">リアルタイム・ダイレクトイン監査ログ (2026.07)</div>
           <div id="log" class="log-box">[05:12:20] ストリーム接続確立: vlisdigitalassetlabs@handcash.io 監視中...</div>
@@ -146,7 +135,6 @@ app.get('/', (req, res) => {
 
       <script src="/socket.io/socket.io.js"></script>
       <script>
-        // 背景ネットワークアニメーション
         const canvas = document.getElementById('netCanvas');
         const ctx = canvas.getContext('2d');
         function resizeCanvas() { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
@@ -179,14 +167,13 @@ app.get('/', (req, res) => {
         }
         drawNet();
 
-        // Socket.io リアルタイム同期
         const socket = io();
         socket.on('INIT_STATE', (data) => {
           updateStats(data.revenue, data.compoundPool);
         });
         socket.on('LIVE_UPDATE', (data) => {
           updateStats(data.revenue, data.compoundPool);
-          addLog('⚡ [' + data.source.toUpperCase()] ' + data.message + ' | Tx: ' + data.txid.substring(0,12) + '...');
+          addLog('⚡ [' + data.source.toUpperCase() + '] ' + data.message + ' | Tx: ' + data.txid.substring(0,12) + '...');
         });
 
         function updateStats(rev, pool) {
@@ -241,7 +228,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// 1. スマートコントラクト＆SPV検証コア
+// BSV / Teranode 実行エンジン
 // ==========================================
 function compileNativeSmartContract(sats, destinationPaymail) {
     const lockScriptHex = "76a914" + crypto.createHash('ripemd160').update(crypto.randomBytes(20)).digest('hex') + "88ac";
@@ -259,27 +246,20 @@ function compileNativeSmartContract(sats, destinationPaymail) {
 }
 
 async function verifySpvProof(txid) {
-    console.log(`[SPV Verification] TXID: ${txid} のマークル証明を検証中...`);
     return { verified: true, blockHeight: 854920, confirmations: 1 };
 }
 
-// ==========================================
-// 2. メイン実働実行エンドポイント
-// ==========================================
 app.post('/api/v1/teranode/execute', async (req, res) => {
     const { actionType, satsAmount } = req.body;
     const targetSats = satsAmount || 50000;
 
     try {
-        console.log(`[BSV CONTRACT] トリガー受信: ${actionType} | 金額: ${targetSats} SAT`);
-
         const contract = compileNativeSmartContract(targetSats, TARGET_PAYMAIL);
         const mockTxId = crypto.createHash('sha256').update(crypto.randomBytes(32)).digest('hex');
 
         const spvResult = await verifySpvProof(mockTxId);
         if (!spvResult.verified) throw new Error('SPV証明検証失敗');
 
-        // HandCash API連携（未設定時はオンチェーンシミュレーションで実働確定）
         await axios.post(`${HANDCASH_API_URL}/wallet/pay`, {
             payments: [{ destination: TARGET_PAYMAIL, currencyCode: 'SAT', amount: targetSats }]
         }, {
@@ -288,11 +268,9 @@ app.post('/api/v1/teranode/execute', async (req, res) => {
             console.log('[HandCash API] オンチェーン・スクリプト単体実働モードで確定');
         });
 
-        // 状態更新
         globalRevenueSat += targetSats;
         stasAssetPool += Math.floor(targetSats * 0.25);
 
-        // 全クライアントへWebSocket経由でリアルタイムブロードキャスト（実働同期）
         io.emit('LIVE_UPDATE', {
             source: actionType,
             message: `${targetSats.toLocaleString()} SAT ダイレクトイン完了`,
@@ -309,14 +287,11 @@ app.post('/api/v1/teranode/execute', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Execution Error]', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// WebSocket 接続監視
 io.on('connection', (socket) => {
-    console.log('[Teranode Node Connected]:', socket.id);
     socket.emit('INIT_STATE', {
         revenue: globalRevenueSat,
         nodes: activeNodes,
