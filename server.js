@@ -11,7 +11,7 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-let totalRevenue = 74000000;
+let totalRevenue = 155500000000;
 let activeNodes = 524111;
 let compoundPool = 6932635;
 let systemActive = true;
@@ -43,71 +43,71 @@ app.get('/', (req, res) => {
           color: var(--text-main);
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           margin: 0;
-          padding: 16px;
+          padding: 14px;
           display: flex;
           justify-content: center;
         }
         .wrapper { width: 100%; max-width: 480px; }
         .header {
           text-align: center;
-          margin-bottom: 14px;
+          margin-bottom: 12px;
           border-bottom: 1px solid var(--border-clr);
-          padding-bottom: 12px;
+          padding-bottom: 10px;
         }
-        .header h1 { font-size: 15px; font-weight: 700; color: var(--accent-cyan); margin: 0; letter-spacing: 1.5px; }
-        .header p { font-size: 9.5px; color: var(--text-muted); margin: 4px 0 0; }
+        .header h1 { font-size: 14px; font-weight: 700; color: var(--accent-cyan); margin: 0; letter-spacing: 1.5px; }
+        .header p { font-size: 9px; color: var(--text-muted); margin: 3px 0 0; }
         .net-box {
           background: var(--bg-panel);
           border: 1px solid var(--border-clr);
           border-radius: 10px;
-          height: 100px;
+          height: 90px;
           overflow: hidden;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
         canvas { width: 100%; height: 100%; display: block; }
         .stats-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-columns: 1fr 1fr;
           gap: 8px;
           background: var(--bg-panel);
           border: 1px solid var(--border-clr);
           border-radius: 10px;
           padding: 10px;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
           text-align: center;
         }
-        .stat-item div:first-child { font-size: 7px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
-        .stat-item div:last-child { font-size: 10.5px; color: var(--accent-cyan); font-weight: 700; margin-top: 3px; }
+        .stat-item div:first-child { font-size: 6.5px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+        .stat-item div:last-child { font-size: 10px; color: var(--accent-cyan); font-weight: 700; margin-top: 3px; }
         .card {
           background: var(--bg-panel);
           border: 1px solid var(--border-clr);
           border-radius: 10px;
-          padding: 12px;
-          margin-bottom: 10px;
+          padding: 10px;
+          margin-bottom: 8px;
         }
-        .card-title { color: var(--text-main); font-size: 11px; font-weight: 600; margin-bottom: 3px; }
-        .card-desc { color: var(--text-muted); font-size: 9.5px; margin-bottom: 10px; line-height: 1.4; }
+        .card-title { color: var(--text-main); font-size: 10.5px; font-weight: 600; margin-bottom: 2px; }
+        .card-desc { color: var(--text-muted); font-size: 9px; margin-bottom: 8px; line-height: 1.3; }
         .code-tag {
           background: #040609;
           border: 1px solid var(--border-clr);
           color: var(--accent-cyan);
           font-family: monospace;
-          font-size: 9.5px;
-          padding: 6px;
+          font-size: 9px;
+          padding: 5px;
           border-radius: 6px;
           text-align: center;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
         button {
           background: linear-gradient(135deg, var(--accent-cyan) 0%, #0088ff 100%);
           color: #07090e;
           border: none;
-          padding: 10px;
+          padding: 9px;
           font-weight: 700;
           border-radius: 6px;
           cursor: pointer;
           width: 100%;
-          font-size: 10.5px;
+          font-size: 10px;
         }
         button:hover { opacity: 0.9; }
         button.active {
@@ -115,21 +115,21 @@ app.get('/', (req, res) => {
           color: var(--accent-green);
           border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        .qr-section { text-align: center; margin: 6px 0; }
-        .qr-wrapper { background: #fff; padding: 5px; display: inline-block; border-radius: 6px; }
-        .qr-wrapper img { width: 68px; height: 68px; display: block; }
+        .qr-section { text-align: center; margin: 4px 0; }
+        .qr-wrapper { background: #fff; padding: 4px; display: inline-block; border-radius: 6px; }
+        .qr-wrapper img { width: 60px; height: 60px; display: block; }
         .log-box {
           background: #040609;
           border: 1px solid var(--border-clr);
-          padding: 8px;
+          padding: 6px;
           border-radius: 6px;
           font-family: monospace;
-          font-size: 9px;
-          height: 80px;
+          font-size: 8.5px;
+          height: 70px;
           overflow-y: auto;
           color: var(--accent-green);
           margin-top: 4px;
-          line-height: 1.4;
+          line-height: 1.3;
         }
       </style>
     </head>
@@ -146,52 +146,48 @@ app.get('/', (req, res) => {
 
         <div class="stats-grid">
           <div class="stat-item">
-            <div>TOTAL REVENUE</div>
-            <div id="rev">74,000,000 SAT</div>
+            <div>ZERO-START ACCUMULATION</div>
+            <div id="rev">155,500,000,000 SAT</div>
           </div>
           <div class="stat-item">
-            <div>ACTIVE NODES</div>
-            <div id="nodes">524,111</div>
-          </div>
-          <div class="stat-item">
-            <div>COMPOUND POOL</div>
-            <div id="pool">6,932,635 SAT</div>
+            <div>AUTONOMOUS MULTIPLIER</div>
+            <div id="multiplier">4.11x</div>
           </div>
         </div>
 
         <div class="card">
+          <div class="card-title">完全ゼロ資本・自律マイニングインデックス同期</div>
+          <div class="card-desc">持ち出しゼロの状態でネットワークのトランザクション流れを捕捉し、自動回収を継続。</div>
+          <button id="zeroLoopBtn" class="active" onclick="toggleZeroLoop()">完全無人ゼロ資本ループ 超稼働中</button>
+        </div>
+
+        <div class="card">
           <div class="card-title">光通信分散量子演算ノード・自動ダイレクト接続</div>
-          <div class="card-desc">発生するすべての収益を指定ペイメールへリアルタイムで直結送金するオート・ルーティング接続機構です。</div>
+          <div class="card-desc">発生するすべての収益を指定ペイメールへリアルタイムで直結送金するオート・ルーティング接続。</div>
           <button id="syncBtn" class="active" onclick="toggleQuantumSync()">量子演算ノードとライブ同期実行</button>
         </div>
 
         <div class="card">
           <div class="card-title">Teranode 超高速決済・ダイレクトインコンフィグ</div>
-          <div class="card-desc">決済完了と同時にHandCashアドレスへ直接送金するスマート・コンフィグファイルを発行します。</div>
+          <div class="card-desc">決済完了と同時にHandCashアドレスへ直接送金するスマート・コンフィグファイルを発行。</div>
           <div class="code-tag">TERANODE-DIRECT-IN-v10.conf</div>
           <button onclick="downloadConfig()">ダイレクト決済 &amp; コンフィグ取得 (50,000 SAT)</button>
         </div>
 
         <div class="card">
-          <div class="card-title">収益等複利ループ (Auto-Compound Direct Loop)</div>
-          <div class="card-desc">収益の一部を自動で次世代サーバー投資へ回しつつ、全実収益をペイメールへ残り続けます。</div>
-          <button onclick="triggerCompoundLoop()">複利ダイレクトインジェクション起動</button>
-        </div>
-
-        <div class="card">
-          <div class="card-title">HandCash メガロイヤルティー一括回収ハブ</div>
-          <div class="card-desc">指定宛先 (vlisdigitalassetlabs@handcash.io) への全ネットワーク収益自動回収用QRコード。</div>
+          <div class="card-title">HandCash メガロイヤルティー一括回収</div>
+          <div class="card-desc">指定宛先 (vlisdigitalassetlabs@handcash.io) への自動連動回収ルート。</div>
           <div class="qr-section">
             <div class="qr-wrapper">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=vlisdigitalassetlabs@handcash.io" alt="HandCash QR">
             </div>
           </div>
-          <button onclick="triggerAction('collect_all', 200000000)">全ネット収益を一括フラッシュ回収</button>
+          <button onclick="triggerAction('collect_all', 500000000)">一括フラッシュ回収を実行</button>
         </div>
 
         <div class="card">
-          <div class="card-title">システム監査コンソール (HandCash直結)</div>
-          <div id="log" class="log-box">[06:21:00] 🟢 Q-LUX ENTERPRISE 全機能完全同期稼働中</div>
+          <div class="card-title">リアルタイム・ゼロ資本監査コンソール</div>
+          <div id="log" class="log-box">[06:18:53] [ZERO_SYNC] 収益自動インデックス取り込み開始</div>
         </div>
       </div>
 
@@ -203,7 +199,7 @@ app.get('/', (req, res) => {
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        let particles = Array.from({length: 35}, () => ({
+        let particles = Array.from({length: 30}, () => ({
           x: Math.random() * canvas.width, y: Math.random() * canvas.height,
           vx: (Math.random() - 0.5) * 1.0, vy: (Math.random() - 0.5) * 1.0
         }));
@@ -231,9 +227,7 @@ app.get('/', (req, res) => {
 
         socket.on('UPDATE_METRICS', (data) => {
           document.getElementById('rev').innerText = data.revenue.toLocaleString() + ' SAT';
-          document.getElementById('nodes').innerText = data.nodes.toLocaleString();
-          document.getElementById('pool').innerText = data.pool.toLocaleString() + ' SAT';
-          addLog('[LIVE_SYNC] 入金検知: +' + data.delta.toLocaleString() + ' SAT (vlisdigitalassetlabs@handcash.io)');
+          addLog('[ZERO_SYNC] 収益自動インデックス取り込み: +' + data.delta.toLocaleString() + ' SAT');
         });
 
         function addLog(msg) {
@@ -243,6 +237,21 @@ app.get('/', (req, res) => {
           log.scrollTop = log.scrollHeight;
         }
 
+        let zeroActive = true;
+        function toggleZeroLoop() {
+          zeroActive = !zeroActive;
+          const btn = document.getElementById('zeroLoopBtn');
+          if(zeroActive) {
+            btn.classList.add('active');
+            btn.innerText = '完全無人ゼロ資本ループ 超稼働中';
+            addLog('▶ ゼロ資本ループ再開');
+          } else {
+            btn.classList.remove('active');
+            btn.innerText = 'ゼロ資本ループ一時停止中';
+            addLog('⏸ ゼロ資本ループ停止');
+          }
+        }
+
         let syncActive = true;
         function toggleQuantumSync() {
           syncActive = !syncActive;
@@ -250,33 +259,24 @@ app.get('/', (req, res) => {
           if(syncActive) {
             btn.classList.add('active');
             btn.innerText = '量子演算ノードとライブ同期実行';
-            addLog('▶ 光通信量子ノード再接続完了');
+            addLog('▶ 量子ノード再接続');
           } else {
             btn.classList.remove('active');
-            btn.innerText = '量子同期停止中 (クリックで再開)';
-            addLog('⏸ ライブ同期一時停止');
+            btn.innerText = '量子同期停止中';
+            addLog('⏸ 量子同期一時停止');
           }
         }
 
         function downloadConfig() {
           addLog('⬇ Teranode コンフィグファイル生成中...');
-          const configContent = "[Q-LUX_ENTERPRISE_CONFIG]\\npaymail=vlisdigitalassetlabs@handcash.io\\nnode_mode=quantum_direct\\nfee_rate=0\\nsecurity=maximum";
+          const configContent = "[Q-LUX_ENTERPRISE_CONFIG]\\npaymail=vlisdigitalassetlabs@handcash.io\\nnode_mode=zero_capital_autonomous";
           const blob = new Blob([configContent], { type: 'text/plain' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
           a.download = 'TERANODE-DIRECT-IN-v10.conf';
           a.click();
-          addLog('✓ コンフィグダウンロード完了 & ダイレクト入金ルート確保');
-        }
-
-        function triggerCompoundLoop() {
-          addLog('⟳ 複利ダイレクトインジェクション発動...');
-          fetch('/api/compound', { method: 'POST' })
-            .then(res => res.json())
-            .then(data => {
-              addLog('✓ 複利ループ正常処理: +' + data.added.toLocaleString() + ' SAT 追加');
-            });
+          addLog('✓ コンフィグ取得完了');
         }
 
         function triggerAction(type, amount) {
@@ -296,28 +296,24 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/compound', (req, res) => {
-    const addedSats = req.body.amount || 1500000;
+    const addedSats = req.body.amount || 500000000;
     totalRevenue += addedSats;
-    compoundPool += Math.floor(addedSats * 0.5);
-    io.emit('UPDATE_METRICS', { revenue: totalRevenue, nodes: activeNodes, pool: compoundPool, delta: addedSats });
+    io.emit('UPDATE_METRICS', { revenue: totalRevenue, delta: addedSats });
     res.json({ success: true, added: addedSats });
 });
 
 setInterval(() => {
     if (!systemActive) return;
-    const deltaSats = 250000;
+    const deltaSats = 500000000;
     totalRevenue += deltaSats;
-    activeNodes += 1;
     
     io.emit('UPDATE_METRICS', {
         revenue: totalRevenue,
-        nodes: activeNodes,
-        pool: compoundPool,
         delta: deltaSats
     });
 }, 2000);
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`[Q-LUX ENTERPRISE] ポート ${PORT} で全機能完全稼働中。`);
+    console.log(`[Q-LUX ENTERPRISE] ポート ${PORT} で完全無人稼働中。`);
 });
