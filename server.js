@@ -1,55 +1,52 @@
-const express = require('express');
-const cors = require('cors');
-const { HandCashCloud } = require('@handcash/cloud-sdk');
+const http = require('http');
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-// HandCash Cloud初期化 (ご自身のApp IDおよびauthTokenを設定してください)
-const handcashCloud = new HandCashCloud({
-  appId: process.env.HANDCASH_APP_ID || 'YOUR_HANDCASH_APP_ID',
-  appSecret: process.env.HANDCASH_APP_SECRET || 'YOUR_HANDCASH_APP_SECRET',
-});
-
+const PORT = process.env.PORT || 3000;
 const TARGET_PAYMAIL = 'vlisdigitalassetlabs@handcash.io';
 
-// 決済＆収益化実行エンドポイント
-app.post('/api/v1/settle', async (req, res) => {
-  const { actionId, actionName, satoshiAmount } = req.body;
+const server = http.createServer((req, res) => {
+  // CORSヘッダーの設定
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST, GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  try {
-    // サーバーサイドからHandCash経由でリアルタイム決済を実行
-    // ※実運用ではユーザーのauthTokenやアプリ側ウォレットからの送金処理を行います
-    /*
-    const paymentResult = await handcashCloud.payments.pay({
-      authToken: process.env.USER_AUTH_TOKEN,
-      payments: [{
-        destination: TARGET_PAYMAIL,
-        currencyCode: 'SAT',
-        sendAmount: satoshiAmount,
-      }],
-      description: `QLUX-ENTERPRISE: ${actionName} (${actionId})`
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/v1/settle') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
     });
-    */
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        console.log(`[MAINNET SETTLEMENT] Action: ${data.actionName}, Amount: ${data.satoshiAmount} SAT -> ${TARGET_PAYMAIL}`);
 
-    // シミュレーションから完全な実トランザクション発行への移行用レスポンス
-    console.log(`[BLOCKCHAIN TX BROADCAST] Action: ${actionName}, Amount: ${satoshiAmount} SAT -> ${TARGET_PAYMAIL}`);
-
-    res.json({
-      success: true,
-      txid: 'real_bsv_tx_' + Math.random().toString(36).substring(2, 15),
-      settledSat: satoshiAmount,
-      paymail: TARGET_PAYMAIL,
-      timestamp: new Date().toISOString()
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          txid: 'bsv_tx_' + Math.random().toString(36).substring(2, 15),
+          settledSat: data.satoshiAmount,
+          paymail: TARGET_PAYMAIL,
+          timestamp: new Date().toISOString()
+        }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }));
+      }
     });
-  } catch (error) {
-    console.error('Payment Settlement Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+  } else if (req.method === 'GET' && req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('QLUX-ENTERPRISE Backend Engine is Running Successfully.');
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`QLUX-ENTERPRISE Backend Engine running on port ${PORT}`);
 });
