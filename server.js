@@ -1,4 +1,4 @@
-/**
+    /**
  * QLUX-ENTERPRISE - PLANETARY OMNIVERSE UNIFIED CORE (2026 Edition)
  * Target Paymail: vlisdigitalassetlabs@handcash.io
  * Technology: BSV Satoshi Script, Teranode Routing, HandCash Nanopayments, Express Unified Host
