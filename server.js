@@ -1,4 +1,4 @@
-   const http = require('http');
+const http = require('http');
 const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
@@ -25,7 +25,7 @@ const INFRASTRUCTURE_ACTIONS = {
 };
 
 function appendLedger(entry) {
-  const logLine = '[' + entry.timestamp + '] Mode:' + entry.mode + ' | Currency:' + entry.currency + ' | Amount:' + entry.amountFormatted + ' | TXID:' + entry.txid + '\n';
+  const logLine = '[' + entry.timestamp + '] SINGULARITY_MODE:' + entry.mode + ' | Currency:' + entry.currency + ' | Flow:' + entry.amountFormatted + ' | TXID:' + entry.txid + ' | Paymail:' + TARGET_PAYMAIL + '\n';
   fs.appendFile(LEDGER_FILE, logLine, function(err) {
     if (err) console.error('Failed to write ledger:', err);
   });
@@ -36,43 +36,156 @@ const HTML_CONTENT = '<!DOCTYPE html>\n' +
 '<head>\n' +
 '  <meta charset="UTF-8">\n' +
 '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
-'  <title>QLUX-ENTERPRISE | Ultimate Global FX & BSV Exchange</title>\n' +
+'  <title>QLUX-ENTERPRISE | Planetary Singularity BSV Exchange</title>\n' +
 '  <style>\n' +
-'    body { background-color: #000103; color: #e2e8f0; font-family: sans-serif; margin: 0; padding: 6px; display: flex; justify-content: center; }\n' +
+'    :root {\n' +
+'      --bg-deep: #000103;\n' +
+'      --bg-card: #040914;\n' +
+'      --border-clr: #0d233a;\n' +
+'      --accent-cyan: #00f0ff;\n' +
+'      --success-green: #00ff66;\n' +
+'      --warning-gold: #ffcc00;\n' +
+'      --danger-pink: #ff0055;\n' +
+'      --text-main: #e2e8f0;\n' +
+'      --text-muted: #64748b;\n' +
+'    }\n' +
+'    * { box-sizing: border-box; }\n' +
+'    body {\n' +
+'      background-color: var(--bg-deep);\n' +
+'      color: var(--text-main);\n' +
+'      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n' +
+'      margin: 0;\n' +
+'      padding: 6px;\n' +
+'      display: flex;\n' +
+'      justify-content: center;\n' +
+'    }\n' +
 '    .wrapper { width: 100%; max-width: 1000px; }\n' +
-'    header { text-align: center; margin-bottom: 6px; border-bottom: 1px solid #0d233a; padding-bottom: 4px; }\n' +
-'    header h1 { font-size: 14px; color: #00f0ff; margin: 0; font-weight: 900; }\n' +
-'    header p { font-size: 5.5px; color: #00ff66; margin: 2px 0 0; font-weight: 800; }\n' +
-'    .master-treasury { background: rgba(0,255,102,0.18); border: 1px solid #00ff66; border-radius: 8px; padding: 8px; margin-bottom: 6px; text-align: center; }\n' +
-'    .treasury-label { font-size: 6px; color: #00ff66; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }\n' +
-'    .treasury-value { font-size: 20px; color: #00ff66; font-weight: 900; font-family: monospace; }\n' +
-'    .exchange-box { background: linear-gradient(135deg, rgba(0,240,255,0.1) 0%, #040914 100%); border: 1px solid #00f0ff; border-radius: 8px; padding: 8px; margin-bottom: 6px; }\n' +
-'    .exchange-title { font-size: 7.5px; color: #00f0ff; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; }\n' +
+'    header { text-align: center; margin-bottom: 6px; border-bottom: 1px solid var(--border-clr); padding-bottom: 4px; }\n' +
+'    header h1 { font-size: 13px; color: var(--accent-cyan); margin: 0; letter-spacing: 0.5px; font-weight: 900; }\n' +
+'    header p { font-size: 5.5px; color: var(--success-green); margin: 2px 0 0; text-transform: uppercase; font-weight: 800; }\n' +
+'    \n' +
+'    .master-treasury {\n' +
+'      background: linear-gradient(135deg, rgba(0,255,102,0.2) 0%, rgba(4,9,20,0.98) 100%);\n' +
+'      border: 1px solid var(--success-green);\n' +
+'      border-radius: 8px;\n' +
+'      padding: 8px;\n' +
+'      margin-bottom: 6px;\n' +
+'      text-align: center;\n' +
+'      box-shadow: 0 0 25px rgba(0,255,102,0.3);\n' +
+'    }\n' +
+'    .treasury-label { font-size: 6px; color: var(--success-green); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }\n' +
+'    .treasury-value { font-size: 21px; color: var(--success-green); font-weight: 900; font-family: monospace; }\n' +
+'    .treasury-meta { font-size: 5px; color: var(--text-muted); margin-top: 2px; font-family: monospace; }\n' +
+'\n' +
+'    .fx-bar {\n' +
+'      background: var(--bg-card);\n' +
+'      border: 1px solid var(--accent-cyan);\n' +
+'      border-radius: 6px;\n' +
+'      padding: 6px;\n' +
+'      margin-bottom: 6px;\n' +
+'      display: flex;\n' +
+'      justify-content: space-between;\n' +
+'      align-items: center;\n' +
+'    }\n' +
+'    .fx-title { font-size: 7px; color: var(--accent-cyan); font-weight: 800; }\n' +
+'    select.fx-select {\n' +
+'      background: #000;\n' +
+'      color: var(--success-green);\n' +
+'      border: 1px solid var(--accent-cyan);\n' +
+'      padding: 3px 6px;\n' +
+'      border-radius: 4px;\n' +
+'      font-size: 7px;\n' +
+'      font-weight: bold;\n' +
+'    }\n' +
+'\n' +
+'    .exchange-box {\n' +
+'      background: linear-gradient(135deg, rgba(255,204,0,0.12) 0%, rgba(4,9,20,0.98) 100%);\n' +
+'      border: 1px solid var(--warning-gold);\n' +
+'      border-radius: 8px;\n' +
+'      padding: 8px;\n' +
+'      margin-bottom: 6px;\n' +
+'    }\n' +
+'    .exchange-title { font-size: 7.5px; color: var(--warning-gold); font-weight: 900; margin-bottom: 4px; text-transform: uppercase; }\n' +
 '    .exchange-row { display: flex; gap: 5px; align-items: center; margin-bottom: 4px; }\n' +
-'    input.ex-input { background: #000; color: #00ff66; border: 1px solid #00f0ff; padding: 4px; border-radius: 4px; font-size: 7px; width: 100%; font-family: monospace; }\n' +
-'    select.fx-select { background: #000; color: #00ff66; border: 1px solid #00f0ff; padding: 4px; border-radius: 4px; font-size: 7px; font-weight: bold; }\n' +
-'    .fx-bar { background: #040914; border: 1px solid #00f0ff; border-radius: 6px; padding: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }\n' +
-'    .fx-title { font-size: 7px; color: #00f0ff; font-weight: 800; }\n' +
-'    .grid-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 6px; }\n' +
-'    .section-block { background: #040914; border: 1px solid #0d233a; border-radius: 6px; padding: 5px; display: flex; flex-direction: column; justify-content: space-between; }\n' +
-'    .block-title { color: #00f0ff; font-size: 7px; font-weight: 800; margin-bottom: 1px; }\n' +
-'    button { background: linear-gradient(135deg, #00f0ff 0%, #004466 100%); color: #000; border: none; padding: 4px; font-weight: 900; border-radius: 3px; cursor: pointer; width: 100%; font-size: 6px; }\n' +
-'    button.gold { background: linear-gradient(135deg, #ffcc00 0%, #996600 100%); color: #000; }\n' +
-'    .terminal-container { background: #000205; border: 1px solid #0d233a; padding: 5px; border-radius: 6px; font-family: monospace; font-size: 5.5px; height: 65px; overflow-y: auto; color: #00ff66; }\n' +
+'    input.ex-input {\n' +
+'      background: #000;\n' +
+'      color: var(--warning-gold);\n' +
+'      border: 1px solid var(--warning-gold);\n' +
+'      padding: 5px;\n' +
+'      border-radius: 4px;\n' +
+'      font-size: 7.5px;\n' +
+'      width: 100%;\n' +
+'      font-family: monospace;\n' +
+'      font-weight: bold;\n' +
+'    }\n' +
+'\n' +
+'    .grid-container {\n' +
+'      display: grid;\n' +
+'      grid-template-columns: 1fr 1fr 1fr;\n' +
+'      gap: 5px;\n' +
+'      margin-bottom: 6px;\n' +
+'    }\n' +
+'    @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr 1fr; } }\n' +
+'    @media (max-width: 480px) { .grid-container { grid-template-columns: 1fr; } }\n' +
+'\n' +
+'    .section-block {\n' +
+'      background: var(--bg-card);\n' +
+'      border: 1px solid var(--border-clr);\n' +
+'      border-radius: 6px;\n' +
+'      padding: 5px;\n' +
+'      display: flex;\n' +
+'      flex-direction: column;\n' +
+'      justify-content: space-between;\n' +
+'    }\n' +
+'    .block-title { color: var(--accent-cyan); font-size: 7px; font-weight: 800; margin-bottom: 2px; }\n' +
+'\n' +
+'    button {\n' +
+'      background: linear-gradient(135deg, var(--accent-cyan) 0%, #004466 100%);\n' +
+'      color: #000;\n' +
+'      border: none;\n' +
+'      padding: 5px;\n' +
+'      font-weight: 900;\n' +
+'      border-radius: 3px;\n' +
+'      cursor: pointer;\n' +
+'      width: 100%;\n' +
+'      font-size: 6px;\n' +
+'    }\n' +
+'    button.gold {\n' +
+'      background: linear-gradient(135deg, var(--warning-gold) 0%, #996600 100%);\n' +
+'      color: #000;\n' +
+'      font-size: 7px;\n' +
+'      padding: 6px;\n' +
+'    }\n' +
+'    button.active { background: linear-gradient(135deg, var(--success-green) 0%, #005522); color: #fff; }\n' +
+'\n' +
+'    .terminal-container {\n' +
+'      background: #000205;\n' +
+'      border: 1px solid var(--border-clr);\n' +
+'      padding: 5px;\n' +
+'      border-radius: 6px;\n' +
+'      font-family: monospace;\n' +
+'      font-size: 5.5px;\n' +
+'      height: 70px;\n' +
+'      overflow-y: auto;\n' +
+'      color: var(--success-green);\n' +
+'    }\n' +
 '  </style>\n' +
 '</head>\n' +
 '<body>\n' +
 '  <div class="wrapper">\n' +
 '    <header>\n' +
-'      <h1>QLUX-ENTERPRISE ULTIMATE BSV EXCHANGE</h1>\n' +
-'      <p>Planetary Dual-Directional Fiat & BSV Singularity Gateway</p>\n' +
+'      <h1>QLUX-ENTERPRISE PLANETARY SINGULARITY BSV EXCHANGE</h1>\n' +
+'      <p>The Ultimate Decentralized Multi-Currency & Teranode Gateway</p>\n' +
 '    </header>\n' +
+'\n' +
 '    <div class="master-treasury">\n' +
 '      <div class="treasury-label">Global Master Treasury Inflow Pool (BSV Native)</div>\n' +
 '      <div id="masterBalance" class="treasury-value">2,156,410,240 SAT</div>\n' +
+'      <div class="treasury-meta">Paymail: vlisdigitalassetlabs@handcash.io | Teranode Mesh: ONLINE</div>\n' +
 '    </div>\n' +
+'\n' +
 '    <div class="fx-bar">\n' +
-'      <div class="fx-title">🌐 グローバル基準通貨選択 (Global FX Selector)</div>\n' +
+'      <div class="fx-title">🌐 換算基準法定通貨 (Global FX Selector)</div>\n' +
 '      <select id="currencySelect" class="fx-select" onchange="updateAll()">\n' +
 '        <option value="USD">USD ($ - 米ドル)</option>\n' +
 '        <option value="JPY" selected>JPY (¥ - 日本円)</option>\n' +
@@ -80,22 +193,28 @@ const HTML_CONTENT = '<!DOCTYPE html>\n' +
 '        <option value="GBP">GBP (£ - 英ポンド)</option>\n' +
 '      </select>\n' +
 '    </div>\n' +
+'\n' +
 '    <div class="exchange-box">\n' +
-'      <div class="exchange-title">💱 双方向リアルタイム・エクスチェンジ (BSV ⇄ 法定通貨)</div>\n' +
+'      <div class="exchange-title">⚡ 超高速双方向エクスチェンジ (BSV ⇄ 法定通貨 即時ルート)</div>\n' +
 '      <div class="exchange-row">\n' +
 '        <input type="number" id="satInput" class="ex-input" placeholder="SAT数を入力 (例: 100000)" oninput="calcSatToFiat()">\n' +
-'        <span id="fiatOutput" style="font-size:7px; color:#00ff66; font-weight:bold; white-space:nowrap;">= ¥0.00 JPY</span>\n' +
+'        <span id="fiatOutput" style="font-size:7.5px; color:var(--warning-gold); font-weight:bold; white-space:nowrap; font-family:monospace;">= ¥0.00 JPY</span>\n' +
 '      </div>\n' +
-'      <button class="gold" onclick="executeBsvToFiat()">🚀 BSVから法定通貨へエクスチェンジ＆送金実行</button>\n' +
+'      <button class="gold" onclick="executeBsvToFiat()">🚀 BSVから法定通貨へ瞬間エクスチェンジ＆送金執行</button>\n' +
 '    </div>\n' +
+'\n' +
 '    <div class="grid-container" id="gridContainer"></div>\n' +
-'    <div class="terminal-container" id="logBox">[System] Ultimate Dual-Directional Exchange online. Ready.</div>\n' +
+'\n' +
+'    <div class="terminal-container" id="logBox">\n' +
+'      [System] Planetary Singularity BSV Exchange online. Ready for ultra-high-speed settlement.\n' +
+'    </div>\n' +
 '  </div>\n' +
+'\n' +
 '  <script>\n' +
 '    const RATES = { USD: {r:20000,s:"$",m:1}, JPY: {r:135,s:"¥",m:150}, EUR: {r:21500,s:"€",m:0.92}, GBP: {r:25000,s:"£",m:0.79} };\n' +
 '    const ACTIONS = { 1:"5Gパケット", 2:"物流通行税", 3:"AIナノストリーム", 4:"エスクロー調停", 5:"高速インデックス", 6:"量子ブリッジ", 7:"AIマイニング", 8:"自動配当", 9:"スマートグリッド" };\n' +
 '    const USD_VALS = { 1:0.02, 2:0.08, 3:0.05, 4:0.25, 5:0.01, 6:0.50, 7:1.00, 8:2.50, 9:5.00 };\n' +
-'    \n' +
+'\n' +
 '    function updateAll() {\n' +
 '      const cur = document.getElementById("currencySelect").value;\n' +
 '      const inf = RATES[cur];\n' +
@@ -108,49 +227,56 @@ const HTML_CONTENT = '<!DOCTYPE html>\n' +
 '      }\n' +
 '      calcSatToFiat();\n' +
 '    }\n' +
-'    \n' +
+'\n' +
 '    function calcSatToFiat() {\n' +
 '      const cur = document.getElementById("currencySelect").value;\n' +
 '      const inf = RATES[cur];\n' +
 '      const satVal = parseFloat(document.getElementById("satInput").value) || 0;\n' +
-'      // 1 SATあたりの法定通貨価値を算出 (Rate is USD/EUR/JPY per 1 SAT? No, rateToSat is SAT per 1 USD)\n' +
-'      // USD rateToSat = 20000 (1 USD = 20000 SAT -> 1 SAT = 1/20000 USD)\n' +
 '      const fiatVal = (satVal / inf.r) * (cur === "JPY" ? 150 : cur === "EUR" ? 0.92 : cur === "GBP" ? 0.79 : 1);\n' +
 '      document.getElementById("fiatOutput").innerText = "= " + inf.s + fiatVal.toFixed(2) + " " + cur;\n' +
 '    }\n' +
-'    \n' +
+'\n' +
 '    updateAll();\n' +
-'    \n' +
+'\n' +
 '    function addLog(msg) {\n' +
 '      const box = document.getElementById("logBox");\n' +
 '      box.innerHTML += "<br>[" + new Date().toTimeString().split(" ")[0] + "] " + msg;\n' +
 '      box.scrollTop = box.scrollHeight;\n' +
 '    }\n' +
-'    \n' +
+'\n' +
 '    async function exec(id) {\n' +
 '      const cur = document.getElementById("currencySelect").value;\n' +
+'      const btn = document.getElementById("b-" + id);\n' +
+'      const orig = btn.innerText;\n' +
+'      btn.innerText = "⏳ 処理中...";\n' +
 '      try {\n' +
 '        const res = await fetch("/api/v1/execute", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({actionId:id, currency:cur}) });\n' +
 '        const data = await res.json();\n' +
 '        if(data.success) {\n' +
+'          btn.innerText = "✓ 完了";\n' +
+'          btn.classList.add("active");\n' +
+'          setTimeout(() => { btn.innerText = orig; btn.classList.remove("active"); }, 1000);\n' +
 '          document.getElementById("masterBalance").innerText = data.newTotalBalance.toLocaleString() + " SAT";\n' +
-'          addLog("[INFLOW] " + data.fiatFormatted + " -> +" + data.rewardSat.toLocaleString() + " SAT");\n' +
+'          addLog("[INFLOW] " + data.fiatFormatted + " -> +" + data.rewardSat.toLocaleString() + " SAT (TX: " + data.txid.substring(0,10) + ")");\n' +
 '        }\n' +
-'      } catch(e) { addLog("[ERROR] Network error"); }\n' +
+'      } catch(e) { \n' +
+'        btn.innerText = "❌ エラー";\n' +
+'        setTimeout(() => { btn.innerText = orig; }, 1000);\n' +
+'        addLog("[ERROR] Network failure"); \n' +
+'      }\n' +
 '    }\n' +
-'    \n' +
+'\n' +
 '    async function executeBsvToFiat() {\n' +
 '      const cur = document.getElementById("currencySelect").value;\n' +
 '      const satVal = parseInt(document.getElementById("satInput").value) || 0;\n' +
-'      if(satVal <= 0) { alert("有効なSAT数を入力してください"); return;\n' +
-'      }\n' +
+'      if(satVal <= 0) { alert("有効なSAT数を入力してください"); return; }\n' +
 '      try {\n' +
 '        const res = await fetch("/api/v1/exchange-out", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({satAmount: satVal, currency: cur}) });\n' +
 '        const data = await res.json();\n' +
 '        if(data.success) {\n' +
 '          document.getElementById("masterBalance").innerText = data.newTotalBalance.toLocaleString() + " SAT";\n' +
-'          addLog("[EXCHANGE-OUT] " + satVal.toLocaleString() + " SAT converted to " + data.fiatFormatted + " (TX: " + data.txid + ")");\n' +
-'          alert("エクスチェンジ成功！\\n" + satVal.toLocaleString() + " SAT ➔ " + data.fiatFormatted + "\\nPaymail: " + data.targetPaymail);\n' +
+'          addLog("[EXCHANGE-OUT] " + satVal.toLocaleString() + " SAT ➔ " + data.fiatFormatted + " (TX: " + data.txid + ")");\n' +
+'          alert("✨ 瞬間エクスチェンジ成功！\\n" + satVal.toLocaleString() + " SAT ➔ " + data.fiatFormatted + "\\nPaymail: " + data.targetPaymail);\n' +
 '        } else {\n' +
 '          alert("エラー: " + data.error);\n' +
 '        }\n' +
@@ -180,13 +306,13 @@ const server = http.createServer((req, res) => {
         globalMasterBalance += rewardSat;
 
         const record = {
-          mode: 'INFLOW',
+          mode: 'INFLOW_INGRESS',
           actionId,
           currency,
           fiatFormatted: fx.symbol + convertedFiat.toFixed(2) + ' ' + currency,
           amountFormatted: '+' + rewardSat.toLocaleString() + ' SAT',
           rewardSat,
-          txid: 'tx_in_' + Math.random().toString(36).substring(2, 10),
+          txid: 'tx_in_' + Math.random().toString(36).substring(2, 12),
           timestamp: new Date().toISOString()
         };
 
@@ -223,7 +349,7 @@ const server = http.createServer((req, res) => {
           currency,
           amountFormatted: '-' + satAmount.toLocaleString() + ' SAT',
           fiatFormatted: fx.symbol + fiatVal.toFixed(2) + ' ' + currency,
-          txid: 'tx_out_' + Math.random().toString(36).substring(2, 10),
+          txid: 'tx_out_' + Math.random().toString(36).substring(2, 12),
           timestamp: new Date().toISOString()
         };
 
@@ -251,5 +377,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('Ultimate BSV Exchange Server running on port ' + PORT);
+  console.log('Planetary Singularity BSV Exchange Server running on port ' + PORT);
 });
