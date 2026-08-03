@@ -1,10 +1,28 @@
 {
-  "name": "qlux-backend",
-  "version": "1.0.0",
-  "description": "QLUX Enterprise Backend Engine",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
+  "system": "QLUX-ENTERPRISE Global FX & API Singularity Grid",
+  "status": "ONLINE",
+  "port": 3000,
+  "target_paymail": "vlisdigitalassetlabs@handcash.io",
+  "master_treasury_pool_sat": 2156410240,
+  "supported_currencies": {
+    "USD": { "rate_to_sat": 20000, "symbol": "$", "multiplier": 1.0 },
+    "JPY": { "rate_to_sat": 135, "symbol": "¥", "multiplier": 150.0 },
+    "EUR": { "rate_to_sat": 21500, "symbol": "€", "multiplier": 0.92 },
+    "GBP": { "rate_to_sat": 25000, "symbol": "£", "multiplier": 0.79 }
   },
-  "dependencies": {}
+  "infrastructure_actions": {
+    "1": { "name": "グローバル5Gパケット", "category": "Telecom", "base_fiat_usd": 0.02 },
+    "2": { "name": "自動運転・物流通行税", "category": "Logistics", "base_fiat_usd": 0.08 },
+    "3": { "name": "AI・LLMナノストリーム", "category": "AI_Data", "base_fiat_usd": 0.05 },
+    "4": { "name": "Satoshiエスクロー調停", "category": "SmartContract", "base_fiat_usd": 0.25 },
+    "5": { "name": "Teranode超高速インデックス", "category": "Blockchain", "base_fiat_usd": 0.01 },
+    "6": { "name": "量子クロスチェーンブリッジ", "category": "CrossChain", "base_fiat_usd": 0.50 },
+    "7": { "name": "分散AIハッシュマイニング", "category": "Compute", "base_fiat_usd": 1.00 },
+    "8": { "name": "プラネタリー自動配当", "category": "Dividend", "base_fiat_usd": 2.50 },
+    "9": { "name": "全地球スマートグリッド送電", "category": "EnergyGrid", "base_fiat_usd": 5.00 }
+  },
+  "endpoints": {
+    "dashboard": "GET /",
+    "execute_action": "POST /api/v1/execute"
+  }
 }
