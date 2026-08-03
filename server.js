@@ -1,4 +1,4 @@
-  const http = require('http');
+const http = require('http');
 const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
@@ -7,10 +7,10 @@ const LEDGER_FILE = './settlement_ledger.log';
 
 // 1. 世界中の法定通貨からBSV（SAT）へのリアルタイム換算レート定義
 const FIAT_RATES = {
-  USD: { rateToSat: 20000, symbol: '$' },   // 1 USD = 20,000 SAT
-  JPY: { rateToSat: 135, symbol: '¥' },     // 1 JPY = 135 SAT
-  EUR: { rateToSat: 21500, symbol: '€' },   // 1 EUR = 21,500 SAT
-  GBP: { rateToSat: 25000, symbol: '£' }    // 1 GBP = 25,000 SAT
+  USD: { rateToSat: 20000, symbol: '$' },
+  JPY: { rateToSat: 135, symbol: '¥' },
+  EUR: { rateToSat: 21500, symbol: '€' },
+  GBP: { rateToSat: 25000, symbol: '£' }
 };
 
 // 2. グローバルAPI・インフラストラクチャのアクション定義（USD基準価格）
@@ -81,7 +81,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
     .treasury-value { font-size: 20px; color: var(--success-green); font-weight: 900; font-family: monospace; }
     .treasury-meta { font-size: 5.5px; color: var(--text-muted); margin-top: 2px; font-family: monospace; }
 
-    /* 通貨セレクターバー */
     .fx-bar {
       background: var(--bg-card);
       border: 1px solid var(--accent-cyan);
@@ -190,7 +189,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
       <div class="treasury-meta">Target Paymail: vlisdigitalassetlabs@handcash.io | FX Engine: ACTIVE</div>
     </div>
 
-    <!-- グローバル法定通貨選択バー -->
     <div class="fx-bar">
       <div class="fx-title">🌐 換算基準法定通貨 (Global FX Selector)</div>
       <select id="currencySelect" class="fx-select" onchange="updateCurrencyLabels()">
@@ -410,7 +408,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 外部API / IoTデバイスが直接叩けるグローバル・イングレス・エンドポイント
   if (req.method === 'POST' && (req.url === '/api/v1/execute' || req.url === '/api/v1/global-ingress')) {
     let body = '';
     req.on('data', chunk => { body += chunk.toString(); });
@@ -429,7 +426,6 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        // 法定通貨額の計算とBSV(SAT)へのリアルタイムエクスチェンジ
         const fiatAmountUsd = actionConfig.baseFiatUsd;
         const convertedFiat = fiatAmountUsd * (currency === 'JPY' ? 150 : currency === 'EUR' ? 0.92 : currency === 'GBP' ? 0.79 : 1);
         const rewardSat = Math.round(fiatAmountUsd * fx.rateToSat);
@@ -449,7 +445,6 @@ const server = http.createServer((req, res) => {
           timestamp: new Date().toISOString()
         };
 
-        // サーバーの永続ログファイルにFX換算取引を記録
         appendLedger(record);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
