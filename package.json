@@ -1,7 +1,7 @@
 {
   "name": "qlux",
   "version": "1.0.0",
-  "description": "QLUX Autonomous Teranode & Live HandCash Gateway",
+  "description": "QLUX Autonomous Gateway",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
