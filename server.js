@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
 const TARGET_PAYMAIL = 'vlisdigitalassetlabs@handcash.io';
-const LEDGER_FILE = './qlux_cyan_enterprise.log';
+const LEDGER_FILE = './qlux_master_ledger.log';
 
 const FIAT_RATES = {
   USD: { rateToSat: 19500, symbol: '$', mult: 1, name: 'USD (米ドル)' },
@@ -13,68 +13,68 @@ const FIAT_RATES = {
   BTC: { rateToSat: 0.0000021, symbol: '₿', mult: 0.000015, name: 'BTC (ビットコイン)' }
 };
 
-// 金融庁・機関投資家基準の完全無欠な機能ライディング定義（全シアン統一）
+// ユーザーが思わず押したくなるスマートで最高峰の機能ライディング（全シアン統一）
 const QLUX_MODULES = {
   1: { 
     name: 'Quantum High-Frequency Packet Routing', 
-    subtitle: '量子高速パケット・APIルーティング', 
+    subtitle: '量子高速パケット・APIダイレクト配線', 
     baseUsd: 0.02, 
-    desc: '次世代量子暗号網を介し、ミリ秒単位でデータパケットとサトシの即時クリアリングを実行。高精度ネットワーク制御をワンタップで体験。' 
+    desc: '次世代量子暗号網を介し、ミリ秒単位でデータパケットとサトシをあなた専用ウォレットへ直結送金。圧倒的なスピードを体感。' 
   },
   2: { 
     name: 'Autonomous Supply Chain Settlement', 
-    subtitle: '自律型サプライチェーン国際決済', 
+    subtitle: '自律型サプライチェーン自動収益化', 
     baseUsd: 0.08, 
-    desc: '国境を越えた商取引および物流インフラのデータをリアルタイム処理。仲介者を排除した完全自動のセキュア決済プロトコル。' 
+    desc: '国際間電子商取引の流通データをリアルタイム処理し、発生する収益をワンタップでHandCashへ自動オート・ルーティング。' 
   },
   3: { 
     name: 'Neural LLM Ingestion Stream', 
-    subtitle: '次世代人工知能ナノストリーム', 
+    subtitle: '次世代人工知能ナノストリーム収益', 
     baseUsd: 0.05, 
-    desc: '大規模言語モデル（LLM）および自律型AIエージェントへのセキュアなデータ供給と、超高効率マイクロトランザクションの連動。' 
+    desc: '大規模言語モデル（LLM）の推論データ処理に伴うマイクロ報酬を、あなたのBSVアドレスへ遅延なくダイレクトイン。' 
   },
   4: { 
     name: 'Zero-Trust Escrow Arbitration', 
-    subtitle: 'ゼロトラスト・エスクロー調停基盤', 
+    subtitle: 'ゼロトラスト・エスクロー調停報酬', 
     baseUsd: 0.25, 
-    desc: 'スマートコントラクトとマルチシグネチャ技術により、取引の安全性を数学的に保証する機関投資家向けエスクロー執行システム。' 
+    desc: 'スマートコントラクトによる高度な取引調停が行われるたび、システム報酬が自動的にウォレットへチャージされる堅牢な仕組み。' 
   },
   5: { 
-    name: 'Teranode High-Speed Indexing', 
+    name: 'Teranode High-Speed Indexer', 
     subtitle: 'テラノード超高速台帳インデックス', 
     baseUsd: 0.01, 
-    desc: '圧倒的なスループットを誇るBSV基盤の台帳データを瞬時にインデックス化し、分散型ネットワークの整合性を強固に維持。' 
+    desc: 'BSV基盤の超高スループット台帳データを瞬時に同期・インデックス化し、稼働報酬をリアルタイムに引き出し。' 
   },
   6: { 
     name: 'Multidimensional Quantum Bridge', 
     subtitle: '多次元量子ブリッジ・クロスチェーン', 
     baseUsd: 0.50, 
-    desc: '異なるブロックチェーンおよび金融レイヤー間を暗号学的に安全に接続し、流動性をシームレスに往還させる次世代ブリッジ。' 
+    desc: '異なるブロックチェーン間の流動性往還を安全に仲介し、高収益なブリッジ手数料を自動受給するアドバンス機能。' 
   },
   7: { 
-    name: 'Distributed Compute Optimization', 
+    name: 'Distributed Compute Optimizer', 
     subtitle: '分散型コンピュートリソース最適化', 
     baseUsd: 1.00, 
-    desc: 'グローバルに分散されたハッシュパワーと演算リソースを動的に最適化し、最大のネットワーク効率と経済合理性を導出。' 
+    desc: 'グローバルな演算リソースの最適化配分から生み出されるマイニング報酬を、あなたの口座へダイレクトに流し込み。' 
   },
   8: { 
-    name: 'Global Treasury Asset Allocation', 
+    name: 'Global Treasury Allocator', 
     subtitle: 'グローバル・トレジャリー自動配当', 
     baseUsd: 2.50, 
-    desc: '流動性プール全体の資産アロケーションと自動配当処理を、人間の介入なく完全自律稼働でクリアリングする中枢機能。' 
+    desc: 'プール全体の資産アロケーションと自動配当処理を実行し、最大級のインカムゲインを瞬時に獲得。' 
   },
   9: { 
     name: 'Smart Grid Energy Clearing', 
     subtitle: '次世代スマートグリッド電力決済', 
     baseUsd: 5.00, 
-    desc: '次世代電力網や分散型エネルギーインフラにおけるマイクロ秒単位の電力売買・リアルタイム自動決済を高信頼で処理。' 
+    desc: '次世代電力網や分散型インフラにおけるリアルタイム売買決済から、最高峰のトランザクション報酬を自動回収。' 
   }
 };
 
 let globalMasterBalance = 2156410240;
 
 function appendLedger(entry) {
-  const logLine = `[${entry.timestamp}] QLUX_MODE:${entry.mode} | Currency:${entry.currency} | Flow:${entry.amountFormatted} | Audit_Hash:${entry.auditHash} | Paymail:${TARGET_PAYMAIL}\n`;
+  const logLine = `[${entry.timestamp}] QLUX_PAYOUT:${entry.mode} | Currency:${entry.currency} | Target:${TARGET_PAYMAIL} | Flow:${entry.amountFormatted} | Hash:${entry.auditHash}\n`;
   fs.appendFile(LEDGER_FILE, logLine, err => { if (err) console.error('Ledger error:', err); });
 }
 
@@ -83,11 +83,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QLUX QUANTUM NEURAL NEXUS GATEWAY</title>
+  <title>QLUX | Autonomous Teranode & Live HandCash Gateway</title>
   <style>
     :root {
-      --bg-space: #01080e;
-      --bg-panel: rgba(4, 18, 32, 0.85);
+      --bg-space: #01060b;
+      --bg-panel: rgba(4, 15, 28, 0.9);
       --cyan-primary: #00e5ff;
       --cyan-glow: rgba(0, 229, 255, 0.4);
       --cyan-bright: #80f2ff;
@@ -105,7 +105,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
       justify-content: center;
       overflow-x: hidden;
     }
-    /* 量子アニメーション背景キャンバス */
+    /* 動画風量子アニメーション背景キャンバス */
     #quantumCanvas {
       position: fixed;
       top: 0;
@@ -122,36 +122,34 @@ const HTML_CONTENT = `<!DOCTYPE html>
       margin-bottom: 8px;
       border-bottom: 1px solid var(--cyan-glow);
       padding-bottom: 6px;
-      background: rgba(1, 8, 14, 0.8);
-      backdrop-filter: blur(5px);
+      background: rgba(1, 6, 11, 0.85);
+      backdrop-filter: blur(6px);
       border-radius: 6px;
     }
-    header h1 { font-size: 13px; color: var(--cyan-primary); margin: 0; letter-spacing: 1px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px var(--cyan-glow); }
-    header p { font-size: 5.5px; color: var(--cyan-bright); margin: 3px 0 0; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; }
+    header h1 { font-size: 15px; color: var(--cyan-primary); margin: 0; letter-spacing: 2px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 12px var(--cyan-glow); }
+    header p { font-size: 5.5px; color: var(--cyan-bright); margin: 3px 0 0; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
-    .compliance-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(0, 229, 255, 0.05);
-      border: 1px solid var(--cyan-glow);
-      border-radius: 4px;
-      padding: 4px 8px;
+    /* 量子動画風アニメーションビジュアルボックス */
+    .quantum-video-box {
+      background: rgba(2, 10, 18, 0.95);
+      border: 1px solid var(--cyan-primary);
+      border-radius: 8px;
+      height: 90px;
       margin-bottom: 8px;
-      font-size: 5.5px;
-      color: var(--cyan-bright);
-      font-family: monospace;
-      backdrop-filter: blur(4px);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0,229,255,0.2);
     }
+    #nodeCanvas { width: 100%; height: 100%; display: block; }
 
     .master-treasury {
-      background: linear-gradient(135deg, rgba(0,229,255,0.15) 0%, rgba(4,18,32,0.95) 100%);
+      background: linear-gradient(135deg, rgba(0,229,255,0.18) 0%, rgba(4,15,28,0.95) 100%);
       border: 1px solid var(--cyan-primary);
       border-radius: 8px;
       padding: 10px;
       margin-bottom: 8px;
       text-align: center;
-      box-shadow: 0 0 15px rgba(0,229,255,0.2);
+      box-shadow: 0 0 18px rgba(0,229,255,0.25);
     }
     .treasury-label { font-size: 6px; color: var(--cyan-bright); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px; }
     .treasury-value { font-size: 24px; color: var(--cyan-primary); font-weight: 900; font-family: monospace; text-shadow: 0 0 12px var(--cyan-glow); }
@@ -188,7 +186,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
     input.ex-input { color: var(--cyan-bright); }
 
     .exchange-box {
-      background: linear-gradient(135deg, rgba(0,229,255,0.1) 0%, rgba(4,18,32,0.95) 100%);
+      background: linear-gradient(135deg, rgba(0,229,255,0.12) 0%, rgba(4,15,28,0.95) 100%);
       border: 1px solid var(--cyan-primary);
       border-radius: 8px;
       padding: 8px;
@@ -219,7 +217,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     .module-card:hover {
       border-color: var(--cyan-primary);
-      box-shadow: 0 0 12px rgba(0,229,255,0.3);
+      box-shadow: 0 0 14px rgba(0,229,255,0.35);
     }
     .module-header { display: flex; justify-content: space-between; font-size: 5.5px; color: var(--text-muted); margin-bottom: 2px; font-family: monospace; }
     .module-name { color: var(--cyan-primary); font-size: 7px; font-weight: 800; margin-bottom: 1px; }
@@ -240,7 +238,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
       box-shadow: 0 0 8px rgba(0,229,255,0.4);
       transition: all 0.2s ease;
     }
-    button:hover { filter: brightness(1.2); box-shadow: 0 0 12px var(--cyan-primary); }
+    button:hover { filter: brightness(1.2); box-shadow: 0 0 14px var(--cyan-primary); }
     button.gold {
       background: linear-gradient(135deg, var(--cyan-bright) 0%, #0099cc 100%);
       color: #000;
@@ -249,27 +247,35 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     button.active { background: linear-gradient(135deg, #10b981 0%, #047857); color: #fff; box-shadow: 0 0 12px #10b981; }
 
-    .faq-container {
+    /* QRコード表示セクション */
+    .qr-container {
       background: var(--bg-panel);
-      border: 1px solid var(--cyan-glow);
-      border-radius: 6px;
-      padding: 8px;
+      border: 1px solid var(--cyan-primary);
+      border-radius: 8px;
+      padding: 10px;
       margin-bottom: 8px;
-      backdrop-filter: blur(5px);
+      text-align: center;
+      box-shadow: 0 0 12px rgba(0,229,255,0.2);
     }
-    .faq-title { font-size: 8px; color: var(--cyan-primary); font-weight: 800; margin-bottom: 6px; text-transform: uppercase; border-bottom: 1px solid var(--cyan-glow); padding-bottom: 3px; }
-    .faq-item { margin-bottom: 6px; }
-    .faq-q { font-size: 6.5px; color: var(--cyan-bright); font-weight: 700; margin-bottom: 1px; }
-    .faq-a { font-size: 6px; color: var(--text-muted); line-height: 1.3; }
+    .qr-title { font-size: 7.5px; color: var(--cyan-primary); font-weight: 800; margin-bottom: 6px; text-transform: uppercase; }
+    .qr-box-inner {
+      background: #fff;
+      display: inline-block;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .qr-box-inner img { width: 120px; height: 120px; display: block; }
+    .qr-desc { font-size: 6px; color: var(--text-muted); font-family: monospace; }
 
     .terminal-container {
-      background: #000508;
+      background: #000408;
       border: 1px solid var(--cyan-glow);
       padding: 6px;
       border-radius: 6px;
       font-family: monospace;
       font-size: 5.5px;
-      height: 70px;
+      height: 75px;
       overflow-y: auto;
       color: var(--cyan-primary);
     }
@@ -280,25 +286,24 @@ const HTML_CONTENT = `<!DOCTYPE html>
 
   <div class="wrapper">
     <header>
-      <h1>QLUX QUANTUM NEURAL NEXUS GATEWAY</h1>
-      <p>Autonomous Teranode Mesh & AI-Driven Multi-Currency Financial Core</p>
+      <h1>QLUX</h1>
+      <p>Autonomous Teranode & Live HandCash Gateway (2026 Edition)</p>
     </header>
 
-    <div class="compliance-bar">
-      <span>🛡️ Regulatory Alignment: <strong style="color:var(--cyan-primary);">FATF & Basel III Verified</strong></span>
-      <span>⚡ Core Latency: <strong style="color:var(--cyan-bright);">&lt; 15ms Ultra-Quantum</strong></span>
-      <span>🔒 Security Standard: <strong style="color:var(--cyan-primary);">Lattice-Cryptographic</strong></span>
+    <!-- 量子動画風アニメーションビジュアル -->
+    <div class="quantum-video-box">
+      <canvas id="nodeCanvas"></canvas>
     </div>
 
     <div class="master-treasury">
       <div class="treasury-label">Global Master Clearing Inflow Pool (BSV Native / Teranode)</div>
       <div id="masterBalance" class="treasury-value">2,156,410,240 SAT</div>
-      <div class="treasury-meta">Clearing Agent Paymail: vlisdigitalassetlabs@handcash.io | Neural Liquidity: ACTIVE</div>
+      <div class="treasury-meta">Target HandCash Paymail: vlisdigitalassetlabs@handcash.io | Auto-Deposit: ACTIVE</div>
     </div>
 
     <div class="control-row">
       <div class="panel-box">
-        <div class="panel-title"><span>🌐 グローバル基準通貨選択 (FX Selector)</span><span style="color:var(--cyan-bright);">AI Auto-Sync</span></div>
+        <div class="panel-title"><span>🌐 グローバル基準通貨選択 (FX Selector)</span><span style="color:var(--cyan-bright);">Live Sync</span></div>
         <select id="currencySelect" class="fx-select" onchange="updateInterface()">
           <option value="USD">USD ($ - 米ドル)</option>
           <option value="JPY" selected>JPY (¥ - 日本円)</option>
@@ -314,30 +319,23 @@ const HTML_CONTENT = `<!DOCTYPE html>
           <input type="number" id="satInput" class="ex-input" placeholder="SAT数を入力 (例: 100000)" oninput="calcExchange()">
           <span id="fiatOutput" style="font-size:7.5px; color:var(--cyan-bright); font-weight:bold; white-space:nowrap; font-family:monospace;">= ¥0.00 JPY</span>
         </div>
-        <button class="gold" onclick="executeBsvToFiat()">🚀 量子即時エクスチェンジ＆自動クリアリング執行</button>
+        <button class="gold" onclick="executeBsvToFiat()">🚀 ウォレットへ即時オート送金＆クリアリング執行</button>
       </div>
     </div>
 
     <div class="grid-container" id="moduleGrid"></div>
 
-    <div class="faq-container">
-      <div class="faq-title">📖 QLUX Institutional Q&A (公式ガバナンスおよびシステム仕様解説)</div>
-      <div class="faq-item">
-        <div class="faq-q">Q1. 当プラットフォームにおける決済・換算の法的根拠および安全性について</div>
-        <div class="faq-a">A. 当システムは、BSVブロックチェーン（Teranodeアーキテクチャ）を活用した分散型クリアリング・ハウスであり、国際的な金融規制基準（FATF勧告およびバーゼルIII規制フレームワーク）に完全準拠したAPIルーティングを提供しています。適法かつ透明性の高いスマートコントラクト処理のみを実行します。</div>
+    <!-- QRコード常時表示パネル -->
+    <div class="qr-container">
+      <div class="qr-title">📲 HandCashウォレット受取用 QRコード (vlisdigitalassetlabs@handcash.io)</div>
+      <div class="qr-box-inner">
+        <img id="qrImage" src="" alt="HandCash Paymail QR">
       </div>
-      <div class="faq-item">
-        <div class="faq-q">Q2. 換算レートおよびトランザクションの透明性はどのように担保されていますか？</div>
-        <div class="faq-a">A. すべての為替およびサトシ換算レートは、グローバル・インターバンク市場のリアルタイム価格フィードと暗号学的に同期されています。仲介手数料を排したゼロフィー構造により、常に正確無比な市場価値で即時決済が執行されます。</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Q3. 出金およびペイメイル決済におけるエラーや遅延の対処法について</div>
-        <div class="faq-a">A. ブロックチェーン上の即時ファイナリティにより、トランザクションは数ミリ秒以内に確定します。指定された公式ペイメイル（vlisdigitalassetlabs@handcash.io）へ直結した自動ルーティングにより、人手介入のない完全自動セキュア・クリアリングが行われます。</div>
-      </div>
+      <div class="qr-desc">スキャンまたはタップであなた専用HandCashウォレットへダイレクト送金アクセス</div>
     </div>
 
     <div class="terminal-container" id="logBox">
-      [System] QLUX Quantum Nexus Gateway initialized. Cyan-Neural protocols active. Ready for deployment.
+      [System] QLUX Autonomous Gateway initialized. Live HandCash auto-routing connected to vlisdigitalassetlabs@handcash.io. Ready.
     </div>
   </div>
 
@@ -355,20 +353,20 @@ const HTML_CONTENT = `<!DOCTYPE html>
     window.addEventListener('resize', resize);
     resize();
 
-    for(let i=0; i<60; i++) {
+    for(let i=0; i<70; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
+        vx: (Math.random() - 0.5) * 0.9,
+        vy: (Math.random() - 0.5) * 0.9,
         radius: Math.random() * 1.5 + 0.5
       });
     }
 
     function animateQuantum() {
       ctx.clearRect(0, 0, width, height);
-      ctx.strokeStyle = 'rgba(0, 229, 255, 0.12)';
-      ctx.fillStyle = 'rgba(0, 229, 255, 0.5)';
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.14)';
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.6)';
 
       for(let i=0; i<particles.length; i++) {
         let p = particles[i];
@@ -384,8 +382,8 @@ const HTML_CONTENT = `<!DOCTYPE html>
         for(let j=i+1; j<particles.length; j++) {
           let p2 = particles[j];
           let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if(dist < 100) {
-            ctx.lineWidth = (1 - dist / 100) * 0.8;
+          if(dist < 110) {
+            ctx.lineWidth = (1 - dist / 110) * 0.9;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
@@ -397,6 +395,65 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     animateQuantum();
 
+    // 動画風量子ノード・ネットワークアニメーション (上部ボックス用)
+    const nCanvas = document.getElementById('nodeCanvas');
+    const nCtx = nCanvas.getContext('2d');
+    let nWidth, nHeight;
+    let nodes = [];
+
+    function resizeNodeCanvas() {
+      nWidth = nCanvas.width = nCanvas.offsetWidth || 600;
+      nHeight = nCanvas.height = nCanvas.offsetHeight || 90;
+    }
+    window.addEventListener('resize', resizeNodeCanvas);
+    resizeNodeCanvas();
+
+    for(let i=0; i<25; i++) {
+      nodes.push({
+        x: Math.random() * nWidth,
+        y: Math.random() * nHeight,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: (Math.random() - 0.5) * 1.2,
+        r: Math.random() * 2 + 1
+      });
+    }
+
+    function animateNodes() {
+      nCtx.clearRect(0, 0, nWidth, nHeight);
+      nCtx.strokeStyle = 'rgba(0, 229, 255, 0.35)';
+      nCtx.fillStyle = 'var(--cyan-primary)';
+
+      for(let i=0; i<nodes.length; i++) {
+        let n = nodes[i];
+        n.x += n.vx; n.y += n.vy;
+        if(n.x < 0 || n.x > nWidth) n.vx *= -1;
+        if(n.y < 0 || n.y > nHeight) n.vy *= -1;
+
+        nCtx.beginPath();
+        nCtx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        nCtx.fillStyle = '#00e5ff';
+        nCtx.fill();
+
+        for(let j=i+1; j<nodes.length; j++) {
+          let n2 = nodes[j];
+          let d = Math.hypot(n.x - n2.x, n.y - n2.y);
+          if(d < 85) {
+            nCtx.lineWidth = (1 - d / 85) * 1.2;
+            nCtx.beginPath();
+            nCtx.moveTo(n.x, n.y);
+            nCtx.lineTo(n2.x, n2.y);
+            nCtx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animateNodes);
+    }
+    animateNodes();
+
+    // QRコードの自動生成セット (HandCash Paymail用)
+    const paymailUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=paymail:vlisdigitalassetlabs@handcash.io&color=00e5ff&bgcolor=01060b";
+    document.getElementById("qrImage").src = paymailUrl;
+
     const RATES = { 
       USD: { r: 19500, s: '$', m: 1 }, 
       JPY: { r: 130, s: '¥', m: 152 }, 
@@ -406,15 +463,15 @@ const HTML_CONTENT = `<!DOCTYPE html>
     };
     
     const MODULES = {
-      1: { name: "Quantum High-Frequency Routing", sub: "量子高速パケット・APIルーティング", desc: "次世代量子暗号網を介し、ミリ秒単位でデータとサトシの即時クリアリングを実行。" },
-      2: { name: "Autonomous Supply Chain Settler", sub: "自律型サプライチェーン国際決済", desc: "国境を越えた商取引・物流データをリアルタイム処理する完全自動セキュアプロトコル。" },
-      3: { name: "Neural LLM Ingestion Stream", sub: "次世代人工知能ナノストリーム", desc: "大規模言語モデル（LLM）へのセキュアなデータ供給と超高効率マイクロ決済の連動。" },
-      4: { name: "Zero-Trust Escrow Arbiter", sub: "ゼロトラスト・エスクロー調停基盤", desc: "スマートコントラクトにより取引の安全性を数学的に保証する機関投資家向け調停システム。" },
-      5: { name: "Teranode High-Speed Indexer", sub: "テラノード超高速台帳インデックス", desc: "圧倒的スループットを誇るBSV基盤の台帳データを瞬時にインデックス化し整合性を維持。" },
-      6: { name: "Multidimensional Quantum Bridge", sub: "多次元量子ブリッジ・クロスチェーン", desc: "異なる金融レイヤー間を暗号学的に安全に接続し、流動性をシームレスに往還させるブリッジ。" },
-      7: { name: "Distributed Compute Optimizer", sub: "分散型コンピュートリソース最適化", desc: "分散されたハッシュパワーと演算リソースを動的に最適化し最大のネットワーク効率を導出。" },
-      8: { name: "Global Treasury Allocator", sub: "グローバル・トレジャリー自動配当", desc: "流動性プールの資産アロケーションと自動配当処理を完全自律稼働でクリアリングする中枢。" },
-      9: { name: "Smart Grid Energy Clearing", sub: "次世代スマートグリッド電力決済", desc: "次世代電力網や分散型エネルギーインフラにおけるマイクロ秒単位の売買・決済を高信頼処理。" }
+      1: { name: "Quantum High-Frequency Routing", sub: "量子高速パケット・APIダイレクト配線", desc: "次世代量子暗号網を介し、ミリ秒単位でデータとサトシをあなた専用ウォレットへ直結送金。" },
+      2: { name: "Autonomous Supply Chain Settler", sub: "自律型サプライチェーン自動収益化", desc: "国際間電子商取引の流通データをリアルタイム処理し、収益をワンタップで自動オート送金。" },
+      3: { name: "Neural LLM Ingestion Stream", sub: "次世代人工知能ナノストリーム収益", desc: "大規模言語モデル（LLM）の推論データ処理に伴うマイクロ報酬をアドレスへダイレクトイン。" },
+      4: { name: "Zero-Trust Escrow Arbiter", sub: "ゼロトラスト・エスクロー調停報酬", desc: "スマートコントラクトによる取引調停が行われるたび、システム報酬がウォレットへ自動チャージ。" },
+      5: { name: "Teranode High-Speed Indexer", sub: "テラノード超高速台帳インデックス", desc: "BSV基盤の超高スループット台帳データを瞬時に同期し、稼働報酬をリアルタイムに引き出し。" },
+      6: { name: "Multidimensional Quantum Bridge", sub: "多次元量子ブリッジ・クロスチェーン", desc: "異なる金融レイヤー間の流動性往還を仲介し、高収益なブリッジ手数料を自動受給するアドバンス機能。" },
+      7: { name: "Distributed Compute Optimizer", sub: "分散型コンピュートリソース最適化", desc: "分散された演算リソースの最適化配分から生み出されるマイニング報酬をダイレクトに回収。" },
+      8: { name: "Global Treasury Allocator", sub: "グローバル・トレジャリー自動配当", desc: "プール全体の資産アロケーションと自動配当処理を実行し、最大級のインカムゲインを瞬時獲得。" },
+      9: { name: "Smart Grid Energy Clearing", sub: "次世代スマートグリッド電力決済", desc: "次世代電力網や分散型インフラにおけるリアルタイム売買から、最高峰の報酬を自動受給。" }
     };
     
     const USD_VALS = { 1: 0.02, 2: 0.08, 3: 0.05, 4: 0.25, 5: 0.01, 6: 0.50, 7: 1.00, 8: 2.50, 9: 5.00 };
@@ -432,12 +489,12 @@ const HTML_CONTENT = `<!DOCTYPE html>
         grid.innerHTML += \`
           <div class="module-card">
             <div>
-              <div class="module-header"><span>QLUX-MOD #0\${i}</span><span style="color:var(--cyan-primary);">QUANTUM READY</span></div>
+              <div class="module-header"><span>QLUX-MOD #0\${i}</span><span style="color:var(--cyan-primary);">AUTO-DEPOSIT READY</span></div>
               <div class="module-name">\${mod.name}</div>
               <div class="module-sub">\${mod.sub}</div>
               <div class="module-desc">\${mod.desc}</div>
             </div>
-            <button id="b-\${i}" onclick="execModule(\${i})">量子即時実行 (\${inf.s}\${fiat} / \${sat.toLocaleString()} SAT)</button>
+            <button id="b-\${i}" onclick="execModule(\${i})">ウォレットへ自動入金 (\${inf.s}\${fiat} / \${sat.toLocaleString()} SAT)</button>
           </div>
         \`;
       }
@@ -464,7 +521,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
       const cur = document.getElementById("currencySelect").value;
       const btn = document.getElementById("b-" + id);
       const orig = btn.innerText;
-      btn.innerText = "⚡ 量子処理中...";
+      btn.innerText = "⚡ オート送金中...";
       try {
         const res = await fetch("/api/v1/execute", { 
           method: "POST", 
@@ -473,35 +530,12 @@ const HTML_CONTENT = `<!DOCTYPE html>
         });
         const data = await res.json();
         if(data.success) {
-          btn.innerText = "✓ 完了";
+          btn.innerText = "✓ 入金完了";
           btn.classList.add("active");
-          setTimeout(() => { btn.innerText = orig; btn.classList.remove("active"); }, 1000);
+          setTimeout(() => { btn.innerText = orig; btn.classList.remove("active"); }, 1200);
           document.getElementById("masterBalance").innerText = data.newTotalBalance.toLocaleString() + " SAT";
-          addLog("[QUANTUM-INGRESS] " + data.fiatFormatted + " -> +" + data.rewardSat.toLocaleString() + " SAT (Audit: " + data.auditHash.substring(0,10) + ")");
+          addLog("[HANDCASH-AUTO-DEPOSIT] " + data.fiatFormatted + " ➔ +" + data.rewardSat.toLocaleString() + " SAT sent to vlisdigitalassetlabs@handcash.io (Hash: " + data.auditHash.substring(0,10) + ")");
         }
       } catch(e) { 
         btn.innerText = "❌ エラー";
-        setTimeout(() => { btn.innerText = orig; }, 1000);
-        addLog("[ERROR] Quantum mesh routing failure"); 
-      }
-    }
-
-    async function executeBsvToFiat() {
-      const cur = document.getElementById("currencySelect").value;
-      const satVal = parseInt(document.getElementById("satInput").value) || 0;
-      if(satVal <= 0) { alert("有効なサトシ数値を入力してください"); return; }
-      try {
-        const res = await fetch("/api/v1/exchange-out", { 
-          method: "POST", 
-          headers: { "Content-Type": "application/json" }, 
-          body: JSON.stringify({ satAmount: satVal, currency: cur }) 
-        });
-        const data = await res.json();
-        if(data.success) {
-          document.getElementById("masterBalance").innerText = data.newTotalBalance.toLocaleString() + " SAT";
-          addLog("[QUANTUM-EGRESS] " + satVal.toLocaleString() + " SAT ➔ " + data.fiatFormatted + " (TX: " + data.auditHash + ")");
-          alert("✨ 量子クリアリング成功\\n" + satVal.toLocaleString() + " SAT ➔ " + data.fiatFormatted + "\\nPaymail: " + data.targetPaymail);
-        } else {
-          alert("エラー: " + data.error);
-        }
-      } catch(e) { 
+        setTimeout(() => { btn.innerText = 
