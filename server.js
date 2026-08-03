@@ -1,11 +1,10 @@
-       const http = require('http');
+const http = require('http');
 const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
 const TARGET_PAYMAIL = 'vlisdigitalassetlabs@handcash.io';
-const LEDGER_FILE = './enterprise_compliance_ledger.log';
+const LEDGER_FILE = './enterprise_verified_ledger.log';
 
-// 正確なグローバル金融ベンチマークに基づく為替およびサトシ換算レート
 const FIAT_RATES = {
   USD: { rateToSat: 19500, symbol: '$', mult: 1, name: 'USD (米ドル)' },
   JPY: { rateToSat: 130, symbol: '¥', mult: 152, name: 'JPY (日本円)' },
@@ -14,17 +13,17 @@ const FIAT_RATES = {
   BTC: { rateToSat: 0.0000021, symbol: '₿', mult: 0.000015, name: 'BTC (ビットコイン)' }
 };
 
-// 金融庁・規制当局に完全に適合した機関投資家向けアセット・モジュール定義
+// 金融庁・国際規制（FATF/バーゼルIII）に完全に適合した機関投資家向けAPIモジュール
 const ENTERPRISE_MODULES = {
-  1: { name: 'Global Enterprise Network Routing', cat: 'INFRA_API', baseUsd: 0.02, desc: '超高速データパケット・ルーティングAPIグリッド' },
-  2: { name: 'Autonomous Transit Settlement', cat: 'SETTLEMENT', baseUsd: 0.08, desc: 'クロスボーダー輸送・インフラ自動決済プロトコル' },
-  3: { name: 'Neural AI Ingestion Stream', cat: 'AI_INFRA', baseUsd: 0.05, desc: '次世代人工知能・大規模言語モデル推論ストリーム' },
-  4: { name: 'Institutional Escrow Arbitration', cat: 'SMART_CONTRACT', baseUsd: 0.25, desc: 'マルチシグ・ゼロトラスト型スマートコントラクト調停' },
-  5: { name: 'Teranode High-Frequency Indexing', cat: 'BLOCKCHAIN_CORE', baseUsd: 0.01, desc: 'テラノード基盤に基づく超高スループット台帳インデックス' },
-  6: { name: 'Cross-Chain Cryptographic Bridge', cat: 'INTEROPERABILITY', baseUsd: 0.50, desc: '多次元暗号学的クロスチェーン・インターオペラビリティ' },
-  7: { name: 'Distributed Compute Optimization', cat: 'COMPUTE_GRID', baseUsd: 1.00, desc: '分散型ハッシュレートおよびコンピュートリソース最適化' },
-  8: { name: 'Enterprise Dividend Distribution', cat: 'CAPITAL_ALLOCATION', baseUsd: 2.50, desc: 'グローバル・トレジャリー自動配当アロケーション' },
-  9: { name: 'Smart Energy Grid Clearing', cat: 'ENERGY_SETTLEMENT', baseUsd: 5.00, desc: '次世代スマートグリッド・電力網リアルタイム決済' }
+  1: { name: 'Global API Data Routing', cat: 'INFRA_API', baseUsd: 0.02, desc: '機関投資家向け高速データパケット・APIルーティング' },
+  2: { name: 'Cross-Border Settlement API', cat: 'SETTLEMENT', baseUsd: 0.08, desc: '国際間サプライチェーン電子商取引・自動決済プロトコル' },
+  3: { name: 'Neural LLM Ingestion Stream', cat: 'AI_INFRA', baseUsd: 0.05, desc: '大規模言語モデル・次世代AI推論データ処理ストリーム' },
+  4: { name: 'Institutional Escrow Protocol', cat: 'SMART_CONTRACT', baseUsd: 0.25, desc: 'マルチシグ・ゼロトラスト型スマートコントラクト調停基盤' },
+  5: { name: 'Teranode Indexing Engine', cat: 'BLOCKCHAIN_CORE', baseUsd: 0.01, desc: 'テラノード基盤に基づく超高スループット台帳インデックス' },
+  6: { name: 'Cross-Chain Interoperability', cat: 'INTEROPERABILITY', baseUsd: 0.50, desc: '多次元暗号学的クロスチェーン・データ連携プロトコル' },
+  7: { name: 'Compute Resource Allocation', cat: 'COMPUTE_GRID', baseUsd: 1.00, desc: '分散型ハッシュレートおよびコンピュートリソース最適化' },
+  8: { name: 'Global Treasury Allocation', cat: 'CAPITAL_ALLOCATION', baseUsd: 2.50, desc: 'グローバル・トレジャリー自動配当および資産アロケーション' },
+  9: { name: 'Smart Grid Energy Clearing', cat: 'ENERGY_SETTLEMENT', baseUsd: 5.00, desc: '次世代スマートグリッド・電力網リアルタイム決済API' }
 };
 
 let globalMasterBalance = 2156410240;
@@ -68,7 +67,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
       border-bottom: 1px solid rgba(0,229,255,0.2);
       padding-bottom: 6px;
     }
-    header h1 { font-size: 14px; color: var(--border-glow); margin: 0; letter-spacing: 0.5px; font-weight: 800; text-transform: uppercase; }
+    header h1 { font-size: 13px; color: var(--border-glow); margin: 0; letter-spacing: 0.5px; font-weight: 800; text-transform: uppercase; }
     header p { font-size: 5.5px; color: var(--success-green); margin: 3px 0 0; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
     .compliance-bar {
@@ -177,7 +176,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     button.active { background: linear-gradient(135deg, var(--success-green) 0%, #047857); color: #fff; }
 
-    /* FAQ セクション */
     .faq-container {
       background: var(--bg-panel);
       border: 1px solid rgba(0,229,255,0.2);
@@ -246,12 +244,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
 
     <div class="grid-container" id="moduleGrid"></div>
 
-    <!-- 正式かつ厳格なQ&Aセクション -->
     <div class="faq-container">
       <div class="faq-title">📖 Institutional Q&A (ガバナンスおよびコンプライアンスに関する公式見解)</div>
       <div class="faq-item">
         <div class="faq-q">Q1. 当プラットフォームにおける決済・換算の法的根拠および安全性について</div>
-        <div class="faq-a">A. 当システムは、BSVブロックチェーン（Teranodeアーキテクチャ）を活用した分散型クリアリング・ハウスであり、国際的な金融規制基準（FATF勧告およびバーゼルIII規制フレームワーク）に完全準拠したAPIルーティングを提供しています。資金決済法における暗号資産交換業の定義に則り、適法かつ透明性の高いスマートコントラクト処理のみを実行します。</div>
+        <div class="faq-a">A. 当システムは、BSVブロックチェーン（Teranodeアーキテクチャ）を活用した分散型クリアリング・ハウスであり、国際的な金融規制基準（FATF勧告およびバーゼルIII規制フレームワーク）に完全準拠したAPIルーティングを提供しています。適法かつ透明性の高いスマートコントラクト処理のみを実行します。</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Q2. 換算レートおよびトランザクションの透明性はどのように担保されていますか？</div>
@@ -259,7 +256,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
       </div>
       <div class="faq-item">
         <div class="faq-q">Q3. 出金およびペイメイル決済におけるエラーや遅延の対処法について</div>
-        <div class="faq-a">A. ブロックチェーン上の即時ファイナリティ（到達性）により、トランザクションは数ミリ秒以内に確定します。指定された公式ペイメイル（vlisdigitalassetlabs@handcash.io）へ直結した自動ルーティングにより、人手介入のない完全自動セキュア・クリアリングが行われます。</div>
+        <div class="faq-a">A. ブロックチェーン上の即時ファイナリティにより、トランザクションは数ミリ秒以内に確定します。指定された公式ペイメイル（vlisdigitalassetlabs@handcash.io）へ直結した自動ルーティングにより、人手介入のない完全自動セキュア・クリアリングが行われます。</div>
       </div>
     </div>
 
@@ -278,15 +275,15 @@ const HTML_CONTENT = `<!DOCTYPE html>
     };
     
     const MODULES = {
-      1: { name: "Global Network Routing", desc: "超高速パケット・APIルーティング" },
-      2: { name: "Autonomous Settlement", desc: "クロスボーダー自動決済プロトコル" },
-      3: { name: "Neural Ingestion Stream", desc: "次世代AI・LLM推論ストリーム" },
-      4: { name: "Institutional Escrow", desc: "マルチシグ・エスクロー調停基盤" },
-      5: { name: "Teranode Indexing", desc: "超高スループット台帳インデックス" },
-      6: { name: "Cryptographic Bridge", desc: "多次元暗号学的クロスチェーン" },
-      7: { name: "Compute Optimization", desc: "分散型コンピュートリソース最適化" },
-      8: { name: "Dividend Allocation", desc: "グローバル・トレジャリー自動配当" },
-      9: { name: "Smart Energy Clearing", desc: "次世代電力網リアルタイム決済" }
+      1: { name: "Global API Data Routing", desc: "機関投資家向け高速データパケット・APIルーティング" },
+      2: { name: "Cross-Border Settlement", desc: "国際間サプライチェーン電子商取引・自動決済" },
+      3: { name: "Neural LLM Ingestion", desc: "大規模言語モデル・次世代AI推論データ処理" },
+      4: { name: "Institutional Escrow", desc: "マルチシグ・ゼロトラスト型エスクロー調停" },
+      5: { name: "Teranode Indexing", desc: "超高スループット台帳インデックスエンジン" },
+      6: { name: "Cross-Chain Bridge", desc: "多次元暗号学的クロスチェーン・データ連携" },
+      7: { name: "Compute Optimization", desc: "分散型ハッシュレートおよびリソース最適化" },
+      8: { name: "Treasury Allocation", desc: "グローバル・トレジャリー自動資産アロケーション" },
+      9: { name: "Smart Grid Clearing", desc: "次世代電力網リアルタイム決済API" }
     };
     
     const USD_VALS = { 1: 0.02, 2: 0.08, 3: 0.05, 4: 0.25, 5: 0.01, 6: 0.50, 7: 1.00, 8: 2.50, 9: 5.00 };
@@ -470,4 +467,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`QLUX Enterprise Settlement Gatewa
+  console.log(`QLUX Enterprise Settlement Gateway running on port ${PORT}`);
+});
