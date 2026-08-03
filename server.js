@@ -13,7 +13,6 @@ const FIAT_RATES = {
   BTC: { rateToSat: 0.0000021, symbol: '₿', mult: 0.000015, name: 'BTC (ビットコイン)' }
 };
 
-// ユーザーが思わず押したくなるスマートで最高峰の機能ライディング（全シアン統一）
 const QLUX_MODULES = {
   1: { 
     name: 'Quantum High-Frequency Packet Routing', 
@@ -105,7 +104,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
       justify-content: center;
       overflow-x: hidden;
     }
-    /* 動画風量子アニメーション背景キャンバス */
     #quantumCanvas {
       position: fixed;
       top: 0;
@@ -116,7 +114,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
       pointer-events: none;
     }
     .wrapper { width: 100%; max-width: 1050px; position: relative; z-index: 1; }
-    
     header {
       text-align: center;
       margin-bottom: 8px;
@@ -129,7 +126,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
     header h1 { font-size: 15px; color: var(--cyan-primary); margin: 0; letter-spacing: 2px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 12px var(--cyan-glow); }
     header p { font-size: 5.5px; color: var(--cyan-bright); margin: 3px 0 0; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
-    /* 量子動画風アニメーションビジュアルボックス */
     .quantum-video-box {
       background: rgba(2, 10, 18, 0.95);
       border: 1px solid var(--cyan-primary);
@@ -247,7 +243,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     button.active { background: linear-gradient(135deg, #10b981 0%, #047857); color: #fff; box-shadow: 0 0 12px #10b981; }
 
-    /* QRコード表示セクション */
     .qr-container {
       background: var(--bg-panel);
       border: 1px solid var(--cyan-primary);
@@ -290,7 +285,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
       <p>Autonomous Teranode & Live HandCash Gateway (2026 Edition)</p>
     </header>
 
-    <!-- 量子動画風アニメーションビジュアル -->
     <div class="quantum-video-box">
       <canvas id="nodeCanvas"></canvas>
     </div>
@@ -325,7 +319,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
 
     <div class="grid-container" id="moduleGrid"></div>
 
-    <!-- QRコード常時表示パネル -->
     <div class="qr-container">
       <div class="qr-title">📲 HandCashウォレット受取用 QRコード (vlisdigitalassetlabs@handcash.io)</div>
       <div class="qr-box-inner">
@@ -340,7 +333,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
   </div>
 
   <script>
-    // 背景量子ウェーブ・アニメーション描画エンジン
     const canvas = document.getElementById('quantumCanvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -395,7 +387,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     animateQuantum();
 
-    // 動画風量子ノード・ネットワークアニメーション (上部ボックス用)
     const nCanvas = document.getElementById('nodeCanvas');
     const nCtx = nCanvas.getContext('2d');
     let nWidth, nHeight;
@@ -450,7 +441,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     animateNodes();
 
-    // QRコードの自動生成セット (HandCash Paymail用)
     const paymailUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=paymail:vlisdigitalassetlabs@handcash.io&color=00e5ff&bgcolor=01060b";
     document.getElementById("qrImage").src = paymailUrl;
 
@@ -465,7 +455,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
     const MODULES = {
       1: { name: "Quantum High-Frequency Routing", sub: "量子高速パケット・APIダイレクト配線", desc: "次世代量子暗号網を介し、ミリ秒単位でデータとサトシをあなた専用ウォレットへ直結送金。" },
       2: { name: "Autonomous Supply Chain Settler", sub: "自律型サプライチェーン自動収益化", desc: "国際間電子商取引の流通データをリアルタイム処理し、収益をワンタップで自動オート送金。" },
-      3: { name: "Neural LLM Ingestion Stream", sub: "次世代人工知能ナノストリーム収益", desc: "大規模言語モデル（LLM）の推論データ処理に伴うマイクロ報酬をアドレスへダイレクトイン。" },
+      3: { name: "Neural LLM Ingestion Stream", sub: "次世代人工知能ナノストリーム収益", desc: "大規模言語モデルの推論データ処理に伴うマイクロ報酬をアドレスへダイレクトイン。" },
       4: { name: "Zero-Trust Escrow Arbiter", sub: "ゼロトラスト・エスクロー調停報酬", desc: "スマートコントラクトによる取引調停が行われるたび、システム報酬がウォレットへ自動チャージ。" },
       5: { name: "Teranode High-Speed Indexer", sub: "テラノード超高速台帳インデックス", desc: "BSV基盤の超高スループット台帳データを瞬時に同期し、稼働報酬をリアルタイムに引き出し。" },
       6: { name: "Multidimensional Quantum Bridge", sub: "多次元量子ブリッジ・クロスチェーン", desc: "異なる金融レイヤー間の流動性往還を仲介し、高収益なブリッジ手数料を自動受給するアドバンス機能。" },
@@ -486,17 +476,17 @@ const HTML_CONTENT = `<!DOCTYPE html>
         const fiat = (USD_VALS[i] * inf.m).toFixed(cur === 'BTC' ? 8 : 2);
         const sat = Math.round(USD_VALS[i] * inf.r);
         const mod = MODULES[i];
-        grid.innerHTML += \`
+        grid.innerHTML += `
           <div class="module-card">
             <div>
-              <div class="module-header"><span>QLUX-MOD #0\${i}</span><span style="color:var(--cyan-primary);">AUTO-DEPOSIT READY</span></div>
-              <div class="module-name">\${mod.name}</div>
-              <div class="module-sub">\${mod.sub}</div>
-              <div class="module-desc">\${mod.desc}</div>
+              <div class="module-header"><span>QLUX-MOD #0${i}</span><span style="color:var(--cyan-primary);">AUTO-DEPOSIT READY</span></div>
+              <div class="module-name">${mod.name}</div>
+              <div class="module-sub">${mod.sub}</div>
+              <div class="module-desc">${mod.desc}</div>
             </div>
-            <button id="b-\${i}" onclick="execModule(\${i})">ウォレットへ自動入金 (\${inf.s}\${fiat} / \${sat.toLocaleString()} SAT)</button>
+            <button id="b-${i}" onclick="execModule(${i})">ウォレットへ自動入金 (${inf.s}${fiat} / ${sat.toLocaleString()} SAT)</button>
           </div>
-        \`;
+        `;
       }
       calcExchange();
     }
@@ -538,4 +528,12 @@ const HTML_CONTENT = `<!DOCTYPE html>
         }
       } catch(e) { 
         btn.innerText = "❌ エラー";
-        setTimeout(() => { btn.innerText = 
+        setTimeout(() => { btn.innerText = orig; }, 1000);
+        addLog("[ERROR] Auto-deposit routing failure"); 
+      }
+    }
+
+    async function executeBsvToFiat() {
+      const cur = document.getElementById("currencySelect").value;
+      const satVal = parseInt(document.getElementById("satInput").value) || 0;
+      if(satVal <= 0) { alert("有効なサトシ数値を入力し
