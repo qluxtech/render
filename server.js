@@ -1,36 +1,117 @@
-const http = require('http');
+ const http = require('http');
+const url = require('url');
 
 const PORT = process.env.PORT || 3000;
-const TARGET_PAYMAIL = 'vlisdigitalassetlabs@handcash.io';
+const PAYMAIL = 'vlisdigitalassetlabs@handcash.io';
 
 const FIAT_RATES = {
-  USD: { rateToSat: 19500, symbol: '$', mult: 1, name: 'USD (米ドル)' },
-  JPY: { rateToSat: 130, symbol: '¥', mult: 152, name: 'JPY (日本円)' },
-  EUR: { rateToSat: 21000, symbol: '€', mult: 0.91, name: 'EUR (ユーロ)' },
-  GBP: { rateToSat: 24500, symbol: '£', mult: 0.78, name: 'GBP (英ポンド)' },
-  BTC: { rateToSat: 0.0000021, symbol: '₿', mult: 0.000015, name: 'BTC (ビットコイン)' }
+  USD: { rateToSat: 19500, symbol: '$', mult: 1 },
+  JPY: { rateToSat: 130, symbol: '¥', mult: 152 },
+  EUR: { rateToSat: 21000, symbol: '€', mult: 0.91 },
+  GBP: { rateToSat: 24500, symbol: '£', mult: 0.78 },
+  BTC: { rateToSat: 0.0000021, symbol: '₿', mult: 0.000015 }
 };
 
 const QLUX_SUPER_MODULES = {
-  1: { name: 'Quantum High-Frequency Packet Routing', sub: '量子高速パケット・APIダイレクト配線', desc: 'ミリ秒単位でデータとサトシをウォレットへ直結送金。', baseUsd: 0.02 },
-  2: { name: 'Autonomous Supply Chain Settlement', sub: '自律型サプライチェーン自動収益化', desc: '国際間電子商取引の流通データをリアルタイム処理し収益を自動オート送金。', baseUsd: 0.08 },
-  3: { name: 'Neural LLM Ingestion Stream', sub: '次世代人工知能ナノストリーム収益', desc: '大規模言語モデルの推論データ処理に伴うマイクロ報酬をダイレクトイン。', baseUsd: 0.05 },
-  4: { name: 'Zero-Trust Escrow Arbiter', sub: 'ゼロトラスト・エスクロー調停報酬', desc: 'スマートコントラクトによる取引調停報酬がウォレットへ自動チャージ。', baseUsd: 0.25 },
-  5: { name: 'Teranode High-Speed Indexer', sub: 'テラノード超高速台帳インデックス', desc: '超高スループット台帳データを瞬時に同期し稼働報酬を引き出し。', baseUsd: 0.01 },
-  6: { name: 'Multidimensional Quantum Bridge', sub: '多次元量子ブリッジ・クロスチェーン', desc: '金融レイヤー間の流動性往還を仲介しブリッジ手数料を自動受給。', baseUsd: 0.50 },
-  7: { name: 'Distributed Compute Optimizer', sub: '分散型コンピュートリソース最適化', desc: '演算リソースの最適化配分から生み出されるマイニング報酬を回収。', baseUsd: 1.00 },
-  8: { name: 'Global Treasury Allocator', sub: 'グローバル・トレジャリー自動配当', desc: 'プール全体の資産アロケーションと自動配当処理でインカムゲイン獲得。', baseUsd: 2.50 },
-  9: { name: 'Smart Grid Energy Clearing', sub: '次世代スマートグリッド電力決済', desc: '次世代電力網や分散型インフラにおけるリアルタイム売買から報酬受給。', baseUsd: 5.00 }
+  1: { name: "Quantum High-Frequency Routing", sub: "量子高速パケット・APIダイレクト配線", desc: "ミリ秒単位でデータとサトシをウォレットへ直結送金。", baseUsd: 0.02 },
+  2: { name: "Autonomous Supply Chain Settler", sub: "自律型サプライチェーン自動収益化", desc: "国際間電子商取引の流通データをリアルタイム処理し収益を自動オート送金。", baseUsd: 0.08 },
+  3: { name: "Neural LLM Ingestion Stream", sub: "次世代人工知能ナノストリーム収益", desc: "大規模言語モデルの推論データ処理に伴うマイクロ報酬をダイレクトイン。", baseUsd: 0.05 },
+  4: { name: "Zero-Trust Escrow Arbiter", sub: "ゼロトラスト・エスクロー調停報酬", desc: "スマートコントラクトによる取引調停報酬がウォレットへ自動チャージ。", baseUsd: 0.25 },
+  5: { name: "Teranode High-Speed Indexer", sub: "テラノード超高速台帳インデックス", desc: "超高スループット台帳データを瞬時に同期し稼働報酬を引き出し。", baseUsd: 0.01 },
+  6: { name: "Multidimensional Quantum Bridge", sub: "多次元量子ブリッジ・クロスチェーン", desc: "金融レイヤー間の流動性往還を仲介しブリッジ手数料を自動受給。", baseUsd: 0.50 },
+  7: { name: "Distributed Compute Optimizer", sub: "分散型コンピュートリソース最適化", desc: "演算リソースの最適化配分から生み出されるマイニング報酬を回収。", baseUsd: 1.00 },
+  8: { name: "Global Treasury Allocator", sub: "グローバル・トレジャリー自動配当", desc: "プール全体の資産アロケーションと自動配当処理でインカムゲイン獲得。", baseUsd: 2.50 },
+  9: { name: "Smart Grid Energy Clearing", sub: "次世代スマートグリッド電力決済", desc: "次世代電力網や分散型インフラにおけるリアルタイム売買から報酬受給。", baseUsd: 5.00 }
 };
 
 let globalMasterBalance = 2156410240;
 
-const HTML_CONTENT = `<!DOCTYPE html>
+const server = http.createServer((req, res) => {
+  const parsedUrl = url.parse(req.url, true);
+  const pathname = parsedUrl.pathname;
+
+  if (req.method === 'POST' && req.url === '/api/v1/execute') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const actionId = payload.actionId || 1;
+        const currency = payload.currency || 'USD';
+        const mod = QLUX_SUPER_MODULES[actionId] || QLUX_SUPER_MODULES[1];
+        const fx = FIAT_RATES[currency] || FIAT_RATES.JPY;
+
+        const convertedFiat = mod.baseUsd * fx.mult;
+        const rewardSat = Math.round(mod.baseUsd * fx.rateToSat);
+        globalMasterBalance += rewardSat;
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          success: true, 
+          rewardSat, 
+          fiatFormatted: fx.symbol + convertedFiat.toFixed(2) + ' ' + currency,
+          newTotalBalance: globalMasterBalance, 
+          targetPaymail: PAYMAIL 
+        }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Parse error' }));
+      }
+    });
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/v1/exchange-out') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const satAmount = parseInt(payload.satAmount) || 0;
+        const currency = payload.currency || 'JPY';
+        const fx = FIAT_RATES[currency] || FIAT_RATES.JPY;
+
+        if (satAmount > globalMasterBalance) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: '残高不足' }));
+          return;
+        }
+
+        const fiatVal = (satAmount / fx.rateToSat) * fx.mult;
+        globalMasterBalance -= satAmount;
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          fiatFormatted: fx.symbol + fiatVal.toFixed(2) + ' ' + currency,
+          newTotalBalance: globalMasterBalance,
+          targetPaymail: PAYMAIL
+        }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Parse error' }));
+      }
+    });
+    return;
+  }
+
+  // ワイルドカード動的ページ対応
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+
+  let pageId = '1';
+  if (pathname.startsWith('/bsv/page/')) {
+    const parts = pathname.split('/');
+    if (parts[3] && parts[3].trim() !== '') {
+      pageId = parts[3];
+    }
+  }
+
+  const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QLUX | Supreme BSV Mammoth Autonomous Gateway (World No.1)</title>
+  <title>QLUX | Supreme BSV Mammoth Gateway [Node: ${pageId}]</title>
   <style>
     :root {
       --bg-space: #01060b;
@@ -44,19 +125,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     * { box-sizing: border-box; }
     body {
-      background-color: var(--bg-space);
-      color: var(--text-main);
+      background-color: var(--bg-space); color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      padding: 10px;
-      display: flex;
-      justify-content: center;
-      overflow-x: hidden;
+      margin: 0; padding: 10px; display: flex; justify-content: center; overflow-x: hidden;
     }
-    #quantumCanvas {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
-    }
+    #quantumCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
     .wrapper { width: 100%; max-width: 1100px; position: relative; z-index: 1; }
     header {
       text-align: center; margin-bottom: 10px; border-bottom: 1px solid var(--cyan-glow);
@@ -122,14 +195,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
     button.gold { background: linear-gradient(135deg, var(--accent-gold) 0%, #d97706 100%); color: #000; font-size: 7.5px; padding: 8px; }
     button.active { background: linear-gradient(135deg, #10b981 0%, #047857); color: #fff; }
 
-    .qr-container {
-      background: var(--bg-panel); border: 1px solid var(--cyan-primary); border-radius: 8px;
-      padding: 12px; margin-bottom: 10px; text-align: center; box-shadow: 0 0 15px rgba(0,229,255,0.2);
+    .nav-box {
+      background: var(--bg-panel); border: 1px solid var(--cyan-primary); border-radius: 6px; padding: 10px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center; font-size: 8px; font-family: monospace;
     }
-    .qr-title { font-size: 8px; color: var(--cyan-primary); font-weight: 800; margin-bottom: 6px; text-transform: uppercase; }
-    .qr-box-inner { background: #fff; display: inline-block; padding: 8px; border-radius: 6px; margin-bottom: 6px; }
-    .qr-box-inner img { width: 110px; height: 110px; display: block; }
-    .qr-desc { font-size: 6.5px; color: var(--text-muted); font-family: monospace; }
+    .nav-box a { color: var(--cyan-primary); text-decoration: none; font-weight: bold; }
 
     .terminal-container {
       background: #000408; border: 1px solid var(--cyan-glow); padding: 8px; border-radius: 6px;
@@ -141,14 +211,22 @@ const HTML_CONTENT = `<!DOCTYPE html>
   <canvas id="quantumCanvas"></canvas>
   <div class="wrapper">
     <header>
-      <h1>QLUX MAMMOTH SUPREME GATEWAY</h1>
+      <h1>QLUX MAMMOTH SUPREME GATEWAY [NODE: ${pageId}]</h1>
       <p>World No.1 Autonomous Teranode & Universal Multi-Currency BSV Engine</p>
     </header>
+
+    <div class="nav-box">
+      <div>当前ノード: <strong>#${pageId}</strong></div>
+      <div>
+        <a href="/bsv/page/${Math.max(1, parseInt(pageId || 1) - 1)}">← 前のノード</a> | 
+        <a href="/bsv/page/${parseInt(pageId || 1) + 1}">次のノードへ →</a>
+      </div>
+    </div>
 
     <div class="quantum-video-box"><canvas id="nodeCanvas"></canvas></div>
 
     <div class="master-treasury">
-      <div class="treasury-label">Global Master Clearing Inflow Pool (BSV Native / Teranode Mammoth Engine)</div>
+      <div class="treasury-label">Global Master Clearing Inflow Pool (BSV Node #${pageId})</div>
       <div id="masterBalance" class="treasury-value">2,156,410,240 SAT</div>
       <div class="treasury-meta">Target HandCash Paymail: vlisdigitalassetlabs@handcash.io | Universal Currency Sync: ACTIVE</div>
     </div>
@@ -177,14 +255,8 @@ const HTML_CONTENT = `<!DOCTYPE html>
 
     <div class="grid-container" id="moduleGrid"></div>
 
-    <div class="qr-container">
-      <div class="qr-title">📲 HandCashウォレット受取用 QLUXスーパーQR</div>
-      <div class="qr-box-inner"><img id="qrImage" src="" alt="QR"></div>
-      <div class="qr-desc">vlisdigitalassetlabs@handcash.io</div>
-    </div>
-
     <div class="terminal-container" id="logBox">
-      [System] QLUX Mammoth Supreme Gateway initialized. All 9 Super BSV Modules online. Ready for global domination.
+      [System] QLUX Mammoth Supreme Gateway Node #${pageId} initialized. All 9 Super BSV Modules online.
     </div>
   </div>
 
@@ -223,8 +295,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
     animateNodes();
 
-    document.getElementById("qrImage").src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=paymail:vlisdigitalassetlabs@handcash.io&color=00e5ff&bgcolor=01060b";
-
     const RATES = { 
       USD: { r: 19500, s: '$', m: 1 }, 
       JPY: { r: 130, s: '¥', m: 152 }, 
@@ -234,7 +304,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
     };
     
     const MODULES = {
-      1: { name: "Quantum High-Frequency Routing", sub: "量子高速パケット・APIダイレクト配線", desc: "ミリ秒単位でデータとサトシをあなた専用ウォレットへ直結送金。" },
+      1: { name: "Quantum High-Frequency Routing", sub: "量子高速パケット・APIダイレクト配線", desc: "ミリ秒単位でデータとサトシをウォレットへ直結送金。" },
       2: { name: "Autonomous Supply Chain Settler", sub: "自律型サプライチェーン自動収益化", desc: "国際間電子商取引の流通データをリアルタイム処理し収益を自動オート送金。" },
       3: { name: "Neural LLM Ingestion Stream", sub: "次世代人工知能ナノストリーム収益", desc: "大規模言語モデルの推論データ処理に伴うマイクロ報酬をダイレクトイン。" },
       4: { name: "Zero-Trust Escrow Arbiter", sub: "ゼロトラスト・エスクロー調停報酬", desc: "スマートコントラクトによる取引調停報酬がウォレットへ自動チャージ。" },
@@ -255,17 +325,17 @@ const HTML_CONTENT = `<!DOCTYPE html>
         const fiat = (USD_VALS[i] * inf.m).toFixed(cur === 'BTC' ? 8 : 2);
         const sat = Math.round(USD_VALS[i] * inf.r);
         const mod = MODULES[i];
-        grid.innerHTML += `
+        grid.innerHTML += \`
           <div class="module-card">
             <div>
-              <div class="module-header"><span>MAMMOTH-MOD #0${i}</span><span>ONLINE</span></div>
-              <div class="module-name">${mod.name}</div>
-              <div class="module-sub">${mod.sub}</div>
-              <div class="module-desc">${mod.desc}</div>
+              <div class="module-header"><span>MAMMOTH-MOD #0\${i}</span><span>ONLINE</span></div>
+              <div class="module-name">\${mod.name}</div>
+              <div class="module-sub">\${mod.sub}</div>
+              <div class="module-desc">\${mod.desc}</div>
             </div>
-            <button id="b-${i}" onclick="execModule(${i})">自動入金 (${inf.s}${fiat} / ${sat.toLocaleString()} SAT)</button>
+            <button id="b-\${i}" onclick="execModule(\${i})">自動入金 (\${inf.s}\${fiat} / \${sat.toLocaleString()} SAT)</button>
           </div>
-        `;
+        \`;
       }
       calcExchange();
     }
@@ -324,70 +394,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
     }
   </script>
 </body>
-</html>
-`;
+</html>`;
 
-const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/api/v1/execute') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const payload = JSON.parse(body || '{}');
-        const actionId = payload.actionId || 1;
-        const currency = payload.currency || 'USD';
-        const mod = QLUX_SUPER_MODULES[actionId] || QLUX_SUPER_MODULES[1];
-        const fx = FIAT_RATES[currency] || FIAT_RATES.USD;
+  res.end(html);
+});
 
-        const convertedFiat = mod.baseUsd * fx.mult;
-        const rewardSat = Math.round(mod.baseUsd * fx.rateToSat);
-        globalMasterBalance += rewardSat;
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          success: true, 
-          rewardSat, 
-          fiatFormatted: fx.symbol + convertedFiat.toFixed(2) + ' ' + currency,
-          newTotalBalance: globalMasterBalance, 
-          targetPaymail: TARGET_PAYMAIL 
-        }));
-      } catch (e) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: 'Parse error' }));
-      }
-    });
-  } 
-  else if (req.method === 'POST' && req.url === '/api/v1/exchange-out') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const payload = JSON.parse(body || '{}');
-        const satAmount = parseInt(payload.satAmount) || 0;
-        const currency = payload.currency || 'USD';
-        const fx = FIAT_RATES[currency] || FIAT_RATES.USD;
-
-        if (satAmount > globalMasterBalance) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: false, error: '残高不足' }));
-          return;
-        }
-
-        const fiatVal = (satAmount / fx.rateToSat) * fx.mult;
-        globalMasterBalance -= satAmount;
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: true,
-          fiatFormatted: fx.symbol + fiatVal.toFixed(2) + ' ' + currency,
-          newTotalBalance: globalMasterBalance,
-          targetPaymail: TARGET_PAYMAIL
-        }));
-      } catch (e) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: 'Parse error' }));
-      }
-    });
-  }
-  else if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
-    res.writeHead(200, { 'Content-Type':
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`QLUX Mammoth Supreme Gateway running on port ${PORT}`);
+});
